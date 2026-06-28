@@ -1,0 +1,173 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── Light: cool "drafting paper" (kept usable; the app defaults to dark). ── */
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.985 0.004 250);
+  --foreground: oklch(0.22 0.02 250);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.02 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.02 250);
+  --primary: oklch(0.5 0.13 244);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.95 0.01 250);
+  --secondary-foreground: oklch(0.28 0.02 250);
+  --muted: oklch(0.95 0.008 250);
+  --muted-foreground: oklch(0.5 0.02 250);
+  --accent: oklch(0.93 0.015 250);
+  --accent-foreground: oklch(0.25 0.02 250);
+  --destructive: oklch(0.58 0.22 25);
+  --border: oklch(0.3 0.03 250 / 12%);
+  --input: oklch(0.3 0.03 250 / 16%);
+  --ring: oklch(0.5 0.14 244);
+  --signal: oklch(0.55 0.15 240);
+}
+
+/* ── Dark: "blueprint at night" — deep blue-graphite ink, azure as the brand. ── */
+.dark {
+  --background: oklch(0.165 0.018 250); /* deep blue-graphite, not pure black */
+  --foreground: oklch(0.96 0.006 250);
+  --card: oklch(0.205 0.018 250); /* drafted panel */
+  --card-foreground: oklch(0.96 0.006 250);
+  --popover: oklch(0.185 0.018 250);
+  --popover-foreground: oklch(0.96 0.006 250);
+  --primary: oklch(0.64 0.13 244); /* azure ink — the "do it" color */
+  --primary-foreground: oklch(0.99 0.01 244);
+  --secondary: oklch(0.27 0.02 250);
+  --secondary-foreground: oklch(0.96 0.006 250);
+  --muted: oklch(0.25 0.018 250);
+  --muted-foreground: oklch(0.72 0.02 250);
+  --accent: oklch(0.31 0.025 250);
+  --accent-foreground: oklch(0.97 0.006 250);
+  --destructive: oklch(0.62 0.21 24); /* the redline */
+  --border: oklch(0.85 0.04 250 / 12%); /* cool hairline */
+  --input: oklch(0.85 0.04 250 / 16%);
+  --ring: oklch(0.64 0.14 244);
+  --signal: oklch(0.72 0.15 240); /* brighter azure — live trace + pulse */
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-signal: var(--signal);
+
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    letter-spacing: 0;
+  }
+}
+
+/* ── Signature motion: the load test as a living blueprint stress test. ──
+   Quiet by default; these only fire while a design is under load. */
+@keyframes redline-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-1.5px); }
+  40% { transform: translateX(1.5px); }
+  60% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
+@keyframes signal-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* A saturated component gets redlined: it shakes and the engineer's red
+   hatching is drawn over it — the blueprint marking its own failure. */
+.node-redline {
+  animation: redline-shake 0.5s ease-in-out infinite;
+}
+.node-redline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent 0 7px,
+    color-mix(in oklab, var(--destructive) 24%, transparent) 7px 9px
+  );
+}
+.node-pulse {
+  animation: signal-pulse 1.1s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node-redline,
+  .node-pulse {
+    animation: none;
+  }
+  .react-flow__edge-path {
+    stroke-dasharray: none !important;
+    animation: none !important;
+  }
+}
+
+/* React Flow — bind to theme tokens so the canvas matches the app. */
+.react-flow__controls {
+  box-shadow: 0 4px 24px oklch(0 0 0 / 0.5);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.react-flow__controls-button {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+.react-flow__controls-button:hover {
+  background: var(--accent);
+}
+.react-flow__controls-button svg {
+  fill: var(--muted-foreground);
+}
+.react-flow__attribution {
+  display: none;
+}
+/* Live request flow reads as azure ink marching downstream. */
+.react-flow__edge.animated .react-flow__edge-path {
+  stroke-dasharray: 6 5;
+}

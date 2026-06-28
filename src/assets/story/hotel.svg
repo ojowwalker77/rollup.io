@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-labelledby="title desc">
+  <title id="title">Hotel booking architecture chapter</title>
+  <desc id="desc">A hotel desk, booking screen, and infrastructure nodes connected by request lines.</desc>
+  <rect width="960" height="480" fill="#111827"/>
+  <rect x="0" y="324" width="960" height="156" fill="#0f172a"/>
+  <path d="M0 336h960" stroke="#334155" stroke-width="2"/>
+  <g opacity=".28" stroke="#334155" stroke-width="1">
+    <path d="M80 0v480M180 0v480M280 0v480M380 0v480M480 0v480M580 0v480M680 0v480M780 0v480M880 0v480"/>
+    <path d="M0 80h960M0 160h960M0 240h960M0 320h960M0 400h960"/>
+  </g>
+  <g transform="translate(88 82)">
+    <rect x="0" y="86" width="248" height="184" rx="16" fill="#f8fafc"/>
+    <rect x="18" y="106" width="212" height="142" rx="10" fill="#e2e8f0"/>
+    <rect x="48" y="42" width="152" height="64" rx="14" fill="#f59e0b"/>
+    <rect x="72" y="58" width="104" height="18" rx="6" fill="#111827"/>
+    <path d="M78 67h92" stroke="#fef3c7" stroke-width="4" stroke-linecap="round"/>
+    <rect x="62" y="130" width="42" height="44" rx="8" fill="#38bdf8"/>
+    <rect x="120" y="130" width="42" height="44" rx="8" fill="#34d399"/>
+    <rect x="178" y="130" width="42" height="44" rx="8" fill="#fb923c"/>
+    <rect x="58" y="196" width="142" height="16" rx="8" fill="#94a3b8"/>
+    <rect x="58" y="224" width="92" height="10" rx="5" fill="#64748b"/>
+    <rect x="14" y="264" width="220" height="34" rx="10" fill="#0f172a"/>
+    <circle cx="58" cy="281" r="8" fill="#34d399"/>
+    <circle cx="96" cy="281" r="8" fill="#f59e0b"/>
+    <circle cx="134" cy="281" r="8" fill="#ef4444"/>
+  </g>
+  <g transform="translate(414 80)">
+    <rect x="0" y="0" width="164" height="300" rx="18" fill="#1f2937" stroke="#64748b" stroke-width="2"/>
+    <rect x="28" y="42" width="108" height="28" rx="8" fill="#38bdf8"/>
+    <rect x="28" y="94" width="108" height="28" rx="8" fill="#34d399"/>
+    <rect x="28" y="146" width="108" height="28" rx="8" fill="#f59e0b"/>
+    <rect x="28" y="198" width="108" height="28" rx="8" fill="#a78bfa"/>
+    <rect x="52" y="250" width="60" height="14" rx="7" fill="#94a3b8"/>
+    <path d="M54 56h56M54 108h56M54 160h56M54 212h56" stroke="#0f172a" stroke-width="6" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(668 94)">
+    <rect x="0" y="0" width="204" height="260" rx="16" fill="#f8fafc"/>
+    <rect x="22" y="26" width="160" height="38" rx="10" fill="#111827"/>
+    <path d="M44 45h82" stroke="#e2e8f0" stroke-width="6" stroke-linecap="round"/>
+    <rect x="28" y="92" width="148" height="112" rx="12" fill="#e2e8f0"/>
+    <path d="M50 126h104M50 154h74M50 182h92" stroke="#64748b" stroke-width="8" stroke-linecap="round"/>
+    <rect x="46" y="224" width="112" height="18" rx="9" fill="#10b981"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M336 220C376 204 386 196 414 196" stroke="#38bdf8" stroke-width="8"/>
+    <path d="M578 156C622 132 636 130 668 144" stroke="#34d399" stroke-width="8"/>
+    <path d="M578 244C626 260 640 258 668 236" stroke="#f59e0b" stroke-width="8"/>
+    <path d="M338 292C396 336 560 348 666 292" stroke="#a78bfa" stroke-width="5" stroke-dasharray="14 12"/>
+  </g>
+  <g transform="translate(110 388)">
+    <rect x="0" y="0" width="740" height="54" rx="18" fill="#020617" stroke="#334155"/>
+    <circle cx="42" cy="27" r="13" fill="#38bdf8"/>
+    <path d="M34 27h16M42 19v16" stroke="#020617" stroke-width="4" stroke-linecap="round"/>
+    <path d="M82 19h154M82 35h96" stroke="#cbd5e1" stroke-width="8" stroke-linecap="round"/>
+    <path d="M298 27h116M476 27h116M654 27h46" stroke="#64748b" stroke-width="6" stroke-linecap="round"/>
+    <circle cx="448" cy="27" r="6" fill="#10b981"/>
+    <circle cx="628" cy="27" r="6" fill="#f59e0b"/>
+  </g>
+</svg>

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-labelledby="title desc">
+  <title id="title">ACME Music architecture chapter</title>
+  <desc id="desc">A music streaming app, CDN towers, search, queue, and storage nodes connected by request lines.</desc>
+  <rect width="960" height="480" fill="#0b1220"/>
+  <rect x="0" y="0" width="960" height="128" fill="#082f49"/>
+  <rect x="0" y="342" width="960" height="138" fill="#111827"/>
+  <g opacity=".22" stroke="#334155" stroke-width="1">
+    <path d="M70 0v480M170 0v480M270 0v480M370 0v480M470 0v480M570 0v480M670 0v480M770 0v480M870 0v480"/>
+    <path d="M0 70h960M0 150h960M0 230h960M0 310h960M0 390h960"/>
+  </g>
+  <g transform="translate(82 78)">
+    <rect x="0" y="0" width="188" height="324" rx="30" fill="#020617" stroke="#475569" stroke-width="3"/>
+    <rect x="18" y="32" width="152" height="238" rx="18" fill="#111827"/>
+    <circle cx="94" cy="292" r="15" fill="#1f2937" stroke="#64748b"/>
+    <rect x="42" y="62" width="104" height="104" rx="18" fill="#22c55e"/>
+    <circle cx="94" cy="114" r="30" fill="#052e16"/>
+    <path d="M88 96v45c0 9-10 15-19 10s-9-17 0-22c5-3 11-3 17 0V91l45-10v42c0 9-10 15-19 10s-9-17 0-22c5-3 11-3 17 0V87z" fill="#bbf7d0"/>
+    <rect x="42" y="190" width="104" height="8" rx="4" fill="#38bdf8"/>
+    <circle cx="82" cy="194" r="10" fill="#f8fafc"/>
+    <path d="M48 222h92M48 244h62" stroke="#94a3b8" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(338 86)">
+    <rect x="0" y="118" width="130" height="108" rx="18" fill="#172554" stroke="#38bdf8" stroke-width="2"/>
+    <path d="M38 157h54M38 187h54" stroke="#7dd3fc" stroke-width="12" stroke-linecap="round"/>
+    <rect x="188" y="20" width="138" height="96" rx="18" fill="#052e16" stroke="#22c55e" stroke-width="2"/>
+    <path d="M222 68h70M246 44v48" stroke="#86efac" stroke-width="10" stroke-linecap="round"/>
+    <rect x="190" y="238" width="136" height="96" rx="18" fill="#451a03" stroke="#f97316" stroke-width="2"/>
+    <path d="M224 286h68M258 252v68" stroke="#fdba74" stroke-width="10" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(692 76)">
+    <rect x="0" y="0" width="186" height="108" rx="18" fill="#312e81" stroke="#a78bfa" stroke-width="2"/>
+    <circle cx="58" cy="54" r="25" fill="none" stroke="#ddd6fe" stroke-width="8"/>
+    <path d="M76 72l34 34" stroke="#ddd6fe" stroke-width="10" stroke-linecap="round"/>
+    <path d="M124 36h34M124 60h22" stroke="#c4b5fd" stroke-width="8" stroke-linecap="round"/>
+    <rect x="0" y="160" width="186" height="118" rx="18" fill="#1f2937" stroke="#f97316" stroke-width="2"/>
+    <path d="M42 200h96M42 230h118" stroke="#fed7aa" stroke-width="10" stroke-linecap="round"/>
+    <circle cx="42" cy="258" r="8" fill="#22c55e"/>
+    <circle cx="76" cy="258" r="8" fill="#38bdf8"/>
+    <circle cx="110" cy="258" r="8" fill="#f59e0b"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M270 206C302 200 318 198 338 204" stroke="#38bdf8" stroke-width="8"/>
+    <path d="M468 190C520 146 560 130 526 106" stroke="#22c55e" stroke-width="8"/>
+    <path d="M468 212C558 226 620 188 692 132" stroke="#a78bfa" stroke-width="6"/>
+    <path d="M468 228C558 266 614 286 692 292" stroke="#f97316" stroke-width="7"/>
+    <path d="M664 168c-28 12-54 22-84 28" stroke="#14b8a6" stroke-width="5" stroke-dasharray="12 10"/>
+  </g>
+  <g transform="translate(94 420)" fill="none" stroke-linecap="round">
+    <path d="M0 16c12-20 28-20 40 0s28 20 40 0 28-20 40 0 28 20 40 0 28-20 40 0 28 20 40 0 28-20 40 0 28 20 40 0" stroke="#22c55e" stroke-width="8"/>
+    <path d="M398 16h316" stroke="#64748b" stroke-width="8"/>
+    <circle cx="752" cy="16" r="12" fill="#38bdf8" stroke="none"/>
+  </g>
+  <g transform="translate(360 378)">
+    <rect x="0" y="0" width="246" height="48" rx="16" fill="#020617" stroke="#334155"/>
+    <path d="M28 24h50M102 24h38M164 24h54" stroke="#cbd5e1" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="88" cy="24" r="5" fill="#22c55e"/>
+    <circle cx="152" cy="24" r="5" fill="#a78bfa"/>
+  </g>
+</svg>
