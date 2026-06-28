@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -45,6 +46,9 @@ export function Briefing() {
             </Badge>
           </div>
           <DialogTitle className="text-2xl">{level.name}</DialogTitle>
+          <DialogDescription className="text-[15px] leading-relaxed text-foreground/80">
+            {level.situation}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 px-5 py-4">
@@ -73,7 +77,7 @@ export function Briefing() {
           <section className="flex gap-2.5">
             <Wallet className="mt-0.5 size-4 shrink-0 text-primary" />
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold">Brief</h3>
+              <h3 className="text-sm font-semibold">Targets</h3>
               <p className="mt-0.5 text-sm text-muted-foreground">
                 Peak load <span className="font-mono text-foreground">{level.clientRps.toLocaleString()} rps</span> ·{" "}
                 <span className="font-mono text-foreground">{Math.round(level.clientWriteRatio * 100)}%</span> writes ·

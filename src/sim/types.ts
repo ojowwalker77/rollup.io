@@ -137,4 +137,6 @@ export interface Metrics {
 export interface SimResult {
   nodes: Record<string, NodeResult>;
   metrics: Metrics;
+  /** Offered vs served rps per request class — drives failure diagnostics. */
+  classes: Record<ReqClass, { offered: number; served: number }>;
 }

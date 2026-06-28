@@ -167,6 +167,8 @@ interface PassResult {
   childFlow: Map<string, Map<string, number>>;
   served: number;
   offered: number;
+  servedByClass: ClassFlow;
+  offeredByClass: ClassFlow;
 }
 
 export function runSimulation(
@@ -211,6 +213,8 @@ export function runSimulation(
     const evals = new Map<string, NodeEval>();
     const scalarIn = new Map<string, Flow>();
     const childFlow = new Map<string, Map<string, number>>();
+    const servedByClass = zeroClass();
+    const offeredByClass = zeroClass();
     let served = 0;
     let offered = 0;
 
@@ -228,6 +232,7 @@ export function runSimulation(
       }
       input.set(n.id, cf);
       offered += rps;
+      for (const c of REQ_CLASSES) offeredByClass[c] += cf[c];
     }
 
     for (const id of order) {
@@ -255,6 +260,7 @@ export function runSimulation(
       } else if (r.role === "cache") {
         const hit = cacheHit(node.config);
         servedHere += inc.read * hit * survive; // hits absorbed
+        servedByClass.read += inc.read * hit * survive;
         outFlow.read = inc.read * (1 - hit) * survive; // misses fall through
         outFlow.write = inc.write * survive;
         outFlow.kv = inc.kv * survive;
@@ -264,6 +270,7 @@ export function runSimulation(
       } else if (r.role === "cdn") {
         const hit = cdnHit(node.config);
         servedHere += inc.media * hit * survive;
+        servedByClass.media += inc.media * hit * survive;
         outFlow.media = inc.media * (1 - hit) * survive;
         outFlow.read = inc.read * survive;
         outFlow.write = inc.write * survive;
@@ -274,8 +281,12 @@ export function runSimulation(
         // store: consume the classes it serves; pass anything else through.
         const serves = new Set(r.serves ?? []);
         for (const c of REQ_CLASSES) {
-          if (serves.has(c)) servedHere += inc[c] * survive;
-          else outFlow[c] = inc[c];
+          if (serves.has(c)) {
+            servedHere += inc[c] * survive;
+            servedByClass[c] += inc[c] * survive;
+          } else {
+            outFlow[c] = inc[c];
+          }
         }
       }
 
@@ -298,7 +309,7 @@ export function runSimulation(
       childFlow.set(id, cf);
     }
 
-    return { input, evals, scalarIn, childFlow, served, offered };
+    return { input, evals, scalarIn, childFlow, served, offered, servedByClass, offeredByClass };
   };
 
   // Pass A (downstream unknown) → derive path latency → Pass B (final).
@@ -408,5 +419,10 @@ export function runSimulation(
     totalCostUsd,
   };
 
-  return { nodes: results, metrics };
+  const classes = {} as Record<ReqClass, { offered: number; served: number }>;
+  for (const c of REQ_CLASSES) {
+    classes[c] = { offered: pass.offeredByClass[c], served: Math.min(pass.servedByClass[c], pass.offeredByClass[c]) };
+  }
+
+  return { nodes: results, metrics, classes };
 }

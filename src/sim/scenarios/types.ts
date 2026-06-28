@@ -42,6 +42,8 @@ export interface Level {
   name: string;
   /** Inherited board this level opens with. Omit for a blank, from-scratch start. */
   starter?: Starter;
+  /** Vivid one-line scene: what's happening right now. */
+  situation: string;
   /** One-line objective shown on the brief. */
   brief: string;
   concepts: string[];
