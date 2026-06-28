@@ -343,6 +343,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Default traffic mix for the current level. Real-world scenarios can add separate web, mobile, and partner sources.",
     accent: "#9ca3af",
     defaults: { rps: 1200, writeRatio: 0.2 },
+    route: { role: "source" },
     cost: () => 0,
     fields: [
       {
@@ -383,6 +384,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Provider-neutral fleet of stateless service instances behind a load balancer: VMs, containers, or pods in real deployments.",
     accent: "#38bdf8",
     defaults: { replicas: 1, vcpus: 2, cpuMsPerReq: 2, maxConcurrency: 256 },
+    route: { role: "compute" },
     cost: (c) => Number(c.replicas) * Number(c.vcpus) * VCPU_USD_MO,
     fields: [
       { key: "replicas", label: "Replicas", type: "number", min: 1, max: 200, step: 1, help: "Stateless instances behind the load balancer. Throughput scales ~linearly." },
@@ -433,6 +435,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Managed edge entrypoint for routing, auth checks, throttling, and request fanout.",
     accent: "#60a5fa",
     defaults: { gateways: 2, maxRpsPerGateway: 12000, overheadMs: 3 },
+    route: { role: "compute" },
     cost: (c) => Number(c.gateways) * 180,
     fields: [
       { key: "gateways", label: "Gateway units", type: "number", min: 1, max: 50, step: 1, help: "Regional gateway capacity. Add units when routing/auth itself becomes the first bottleneck." },
@@ -461,6 +464,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Relational primary + read replicas. Reads scale out; writes are stuck on the primary.",
     accent: "#f59e0b",
     defaults: { tier: "medium", readReplicas: 0, maxConnections: 200, queryMs: 6 },
+    route: { role: "store", serves: ["read", "write"] },
     cost: (c) => (SQL_TIER_USD[String(c.tier)] ?? 700) * (1 + Number(c.readReplicas) * 0.9),
     fields: [
       { key: "tier", label: "Instance tier", type: "select", options: [
@@ -483,6 +487,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Redis-style read-through cache. Its lever is memory vs. working set — not replicas.",
     accent: "#34d399",
     defaults: { memoryGB: 8, workingSetGB: 20, maxOps: 100000, hitLatencyMs: 0.5 },
+    route: { role: "cache" },
     cost: (c) => Number(c.memoryGB) * CACHE_GB_USD_MO,
     fields: [
       { key: "memoryGB", label: "Memory", type: "number", min: 1, max: 1024, step: 1, unit: "GB", help: "Cacheable RAM. Hit ratio ≈ memory ÷ working set, so more memory = more reads absorbed." },
@@ -500,6 +505,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "In-memory cache/session store for hot metadata, tokens, and rate-limit counters.",
     accent: "#ef4444",
     defaults: { memoryGB: 24, workingSetGB: 48, maxOps: 180000, hitLatencyMs: 0.7 },
+    route: { role: "cache" },
     cost: (c) => Number(c.memoryGB) * CACHE_GB_USD_MO,
     fields: [
       { key: "memoryGB", label: "Memory", type: "number", min: 1, max: 2048, step: 1, unit: "GB", help: "Hot keys that fit in memory are served without touching the primary datastore." },
@@ -517,6 +523,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Partitioned store. Scales reads AND writes by adding nodes — at the cost of strong consistency.",
     accent: "#a78bfa",
     defaults: { nodes: 3, replicationFactor: 3, consistency: "eventual", opMs: 4 },
+    route: { role: "store", serves: ["kv"] },
     cost: (c) => Number(c.nodes) * NOSQL_NODE_USD_MO,
     fields: [
       { key: "nodes", label: "Nodes", type: "number", min: 1, max: 200, step: 1, help: "Partitions/shards. Capacity scales horizontally for reads and writes alike — the key difference from SQL." },
@@ -558,6 +565,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Blob storage (S3-style). Effectively infinite scale and durability — but high latency.",
     accent: "#fb923c",
     defaults: { firstByteMs: 60 },
+    route: { role: "store", serves: ["media"] },
     cost: () => OBJECT_STORE_USD_MO,
     fields: [
       { key: "firstByteMs", label: "Time to first byte", type: "number", min: 5, max: 500, step: 5, unit: "ms", help: "Object stores are durable and scale endlessly, so throughput is rarely the limit — latency is the cost you pay." },
@@ -583,6 +591,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Edge cache for audio chunks, images, and static assets; misses fall back to origin storage.",
     accent: "#22c55e",
     defaults: { edgeTb: 8, catalogTb: 12, maxRps: 250000, hitLatencyMs: 18 },
+    route: { role: "cdn" },
     cost: (c) => 350 + Number(c.edgeTb) * 45,
     fields: [
       { key: "edgeTb", label: "Edge cache", type: "number", min: 1, max: 500, step: 1, unit: "TB", help: "Regional content cached close to listeners. More edge capacity means fewer origin fetches." },
@@ -616,6 +625,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Elasticsearch/OpenSearch-style index for artist, album, playlist, and podcast queries.",
     accent: "#14b8a6",
     defaults: { nodes: 4, shardGb: 80, queryMs: 12 },
+    route: { role: "store", serves: ["search"] },
     cost: (c) => Number(c.nodes) * SEARCH_NODE_USD_MO,
     fields: [
       { key: "nodes", label: "Search nodes", type: "number", min: 1, max: 100, step: 1, help: "Search capacity scales by adding data/query nodes and spreading shards." },
@@ -647,6 +657,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     blurb: "Kafka/Pub/Sub-style buffer for listening events, analytics, and async fanout.",
     accent: "#f97316",
     defaults: { partitions: 12, consumers: 6, ackMs: 4 },
+    route: { role: "store", serves: ["event"] },
     cost: (c) => Number(c.partitions) * QUEUE_PARTITION_USD_MO + Number(c.consumers) * 60,
     fields: [
       { key: "partitions", label: "Partitions", type: "number", min: 1, max: 500, step: 1, help: "Write throughput and parallelism scale with partitions." },

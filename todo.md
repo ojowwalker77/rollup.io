@@ -80,10 +80,11 @@ Respect reduced-motion. Keyboard focus visible.
 ### Boards & modes
 - [x] Story mode starts from inherited starter boards, not blank — each missing the piece
       that level teaches. Blank only at Hotel L1 (wiring tutorial) + ACME L1 (founder start).
-- [ ] Make the missing piece *mechanically* necessary, not just conceptual. Engine is
-      fan-out (every dep gets the full flow), so adding nosql/search/queue in parallel
-      doesn't offload the primary — only series pieces (cache/CDN) truly reduce load.
-      Needs request-type routing (reads/writes/queries/events) to give those lessons teeth.
+- [x] Make the missing piece *mechanically* necessary. Engine now uses TYPED traffic
+      (read/write/kv/media/search/event) with reachability routing: a class only flows
+      toward a component that can serve it, and a class with no handler simply fails.
+      Verified: ACME L2/L3/L4 starters fail at exactly 1−(missing class fraction) — adding
+      the NoSQL/search/queue store is the fix. Caches/CDN must be wired in series to offload.
 - [ ] Free-play mode (later): every scenario playable on demand, from scratch, outside story mode
 
 ### Provider modes (dormant — re-enable later)

@@ -192,8 +192,8 @@ export const useStore = create<State>()((set, get) => ({
   briefingOpen: true,
   bestCost: loadBest(),
   theme: loadTheme(),
-  result: runSimulation(toSim(board0.nodes), board0.edges, 0),
-  evalResult: runSimulation(toSim(board0.nodes), board0.edges, 1),
+  result: runSimulation(toSim(board0.nodes), board0.edges, 0, level0.mix),
+  evalResult: runSimulation(toSim(board0.nodes), board0.edges, 1, level0.mix),
   display: ZERO_METRICS,
   seq: 0,
 
@@ -271,8 +271,8 @@ export const useStore = create<State>()((set, get) => ({
       history: [],
       traffic: 1,
       briefingOpen: true,
-      result: runSimulation(toSim(board.nodes), board.edges, 0),
-      evalResult: runSimulation(toSim(board.nodes), board.edges, 1),
+      result: runSimulation(toSim(board.nodes), board.edges, 0, level.mix),
+      evalResult: runSimulation(toSim(board.nodes), board.edges, 1, level.mix),
       display: ZERO_METRICS,
       seq: 0,
     });
@@ -367,7 +367,7 @@ export const useStore = create<State>()((set, get) => ({
     if (runPhase === "live") {
       const t = s.clock;
       const mult = profileAt(level, t);
-      const result = runSimulation(sim, se, mult);
+      const result = runSimulation(sim, se, mult, level.mix);
       const m = result.metrics;
 
       const meets = m.offeredRps > 1 && m.availability >= level.sla.availability && m.p99Ms <= level.sla.p99Ms;
@@ -410,8 +410,8 @@ export const useStore = create<State>()((set, get) => ({
 
     // build / won / lost — static preview (build uses the slider; results freeze).
     const previewMult = runPhase === "build" ? traffic : profileAt(level, 1);
-    const result = runSimulation(sim, se, previewMult);
-    const evalResult = runSimulation(sim, se, 1);
+    const result = runSimulation(sim, se, previewMult, level.mix);
+    const evalResult = runSimulation(sim, se, 1, level.mix);
     set({ result, evalResult, display: runPhase === "build" ? ZERO_METRICS : lerpMetrics(display, result.metrics, 0.32) });
   },
 }));

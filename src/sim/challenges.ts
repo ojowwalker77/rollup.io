@@ -5,7 +5,7 @@
 // varies like real life — the design must hold its SLA through the whole window
 // or it bleeds customers (reputation) and loses.
 
-import type { Config, Metrics } from "./types";
+import type { Config, Metrics, ReqClass } from "./types";
 
 export interface Goal {
   id: string;
@@ -57,6 +57,9 @@ export interface Level {
   /** Peak offered load (the Client's rps at profile = 1) + write mix. */
   clientRps: number;
   clientWriteRatio: number;
+  /** Workload as a mix of request classes (fractions). Omit ⇒ derived from
+   *  writeRatio as {read, write} (the hotel chapter). */
+  mix?: Partial<Record<ReqClass, number>>;
   /** Monthly budget cap (USD). Infinity = the efficiency endgame. */
   budgetUsd: number;
   parCostUsd?: number;
@@ -388,6 +391,7 @@ export const ACME_MUSIC: Challenge = {
       lossLine: "playback stuttered. if audio's hammering the origin store, push it to the edge and try again.",
       clientRps: 12000,
       clientWriteRatio: 0.06,
+      mix: { media: 0.5, read: 0.44, write: 0.06 },
       budgetUsd: 9000,
       sla: { availability: 0.995, p99Ms: 180 },
       windowLabel: "Launch day",
@@ -410,7 +414,7 @@ export const ACME_MUSIC: Challenge = {
         ],
         edges: [
           ["client", "gw"], ["client", "cdn"], ["gw", "app"],
-          ["app", "redis"], ["app", "sql"], ["cdn", "store"],
+          ["app", "redis"], ["redis", "sql"], ["cdn", "store"],
         ],
       },
       thread: [
@@ -426,6 +430,7 @@ export const ACME_MUSIC: Challenge = {
       lossLine: "the user-library writes backed up. SQL's one primary can't take that volume — give writes a store that scales out.",
       clientRps: 22000,
       clientWriteRatio: 0.14,
+      mix: { media: 0.45, read: 0.32, write: 0.05, kv: 0.18 },
       budgetUsd: 18500,
       sla: { availability: 0.995, p99Ms: 200 },
       windowLabel: "Evening commute",
@@ -449,7 +454,7 @@ export const ACME_MUSIC: Challenge = {
         ],
         edges: [
           ["client", "gw"], ["client", "cdn"], ["gw", "app"],
-          ["app", "redis"], ["app", "sql"], ["app", "nosql"], ["cdn", "store"],
+          ["app", "redis"], ["redis", "sql"], ["app", "nosql"], ["cdn", "store"],
         ],
       },
       thread: [
@@ -465,6 +470,7 @@ export const ACME_MUSIC: Challenge = {
       lossLine: "search hammered the database flat. it needs its own index, sized for the query load — not the primary.",
       clientRps: 36000,
       clientWriteRatio: 0.12,
+      mix: { media: 0.4, read: 0.27, write: 0.05, kv: 0.15, search: 0.13 },
       budgetUsd: 30000,
       sla: { availability: 0.998, p99Ms: 210 },
       windowLabel: "Friday night",
@@ -489,7 +495,7 @@ export const ACME_MUSIC: Challenge = {
         ],
         edges: [
           ["client", "gw"], ["client", "cdn"], ["gw", "app"],
-          ["app", "redis"], ["app", "sql"], ["app", "nosql"], ["app", "search"], ["cdn", "store"],
+          ["app", "redis"], ["redis", "sql"], ["app", "nosql"], ["app", "search"], ["cdn", "store"],
         ],
       },
       thread: [
@@ -505,6 +511,7 @@ export const ACME_MUSIC: Challenge = {
       lossLine: "the spike took us down. if analytics is blocking playback, put a queue between them and let it absorb the burst.",
       clientRps: 52000,
       clientWriteRatio: 0.22,
+      mix: { media: 0.35, read: 0.22, write: 0.05, kv: 0.15, search: 0.1, event: 0.13 },
       budgetUsd: 50000,
       sla: { availability: 0.999, p99Ms: 220 },
       windowLabel: "Festival launch",

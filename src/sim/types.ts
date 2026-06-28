@@ -37,6 +37,26 @@ export interface ConfigField {
 
 export type Config = Record<string, number | string>;
 
+/** The kinds of request a workload is made of. Each class is served by a
+ *  specific capability, so wiring the right component for each class is the
+ *  whole game: a class with no handler on its path simply fails. */
+export type ReqClass = "read" | "write" | "kv" | "media" | "search" | "event";
+export const REQ_CLASSES: readonly ReqClass[] = ["read", "write", "kv", "media", "search", "event"];
+
+/** Requests/sec broken down by class. */
+export type ClassFlow = Record<ReqClass, number>;
+
+/** How a component participates in class routing.
+ *  - source:  emits the level's class mix.
+ *  - compute: serves nothing itself; passes every class through (bears total load).
+ *  - cache:   serves `read` hits, forwards misses + other classes downstream.
+ *  - cdn:     serves `media` hits, forwards misses + other classes downstream.
+ *  - store:   terminal handler for the classes in `serves`. */
+export interface RouteSpec {
+  role: "source" | "compute" | "cache" | "cdn" | "store";
+  serves?: ReqClass[];
+}
+
 /** A stream of traffic flowing along an edge or into a node. */
 export interface Flow {
   rps: number; // requests per second
@@ -76,6 +96,8 @@ export interface ComponentSpec {
   defaults: Config;
   fields: ConfigField[];
   evaluate: (ctx: EvalContext) => NodeEval;
+  /** How this component routes typed traffic. Falls back to category if unset. */
+  route?: RouteSpec;
   /** Monthly cost (USD) implied by this config. */
   cost: (config: Config) => number;
 }
