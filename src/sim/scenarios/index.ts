@@ -5,11 +5,12 @@ import { ACME_MUSIC } from "./acme";
 import { FEED } from "./feed";
 import { HOTEL } from "./hotel";
 import { NEWS } from "./news";
+import { PROFILE } from "./profile";
 import { LIVE_CHAT } from "./realtime";
 import type { Scenario } from "./types";
 
 // Ordered easy → hard.
-export const SCENARIOS: Scenario[] = [HOTEL, NEWS, LIVE_CHAT, FEED, ACME_MUSIC];
+export const SCENARIOS: Scenario[] = [HOTEL, PROFILE, NEWS, LIVE_CHAT, FEED, ACME_MUSIC];
 
 export const DEFAULT_SCENARIO: Scenario = HOTEL;
 

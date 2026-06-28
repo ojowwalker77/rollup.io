@@ -11,11 +11,12 @@ Re-ground scenarios in real events (GCP Architect case studies + public post-mor
 the synthetic tutorial. Locked: code levers curated/high-signal (not a code editor); stack choice
 (Go/Rust/Node) later; incident-replay style decided after Phase 1.
 
-**Phase 1 — depth everywhere (next):**
-- [ ] Code+data lever model: query pattern (N+1/batch), sync vs async, **DB index** yes/no, payload — engine + curated per-component inspector
-- [ ] Observability component(s) that *gate* the failure diagnosis (no telemetry → blind; instrumented → see the bottleneck) — ties MTTR to observability
-- [ ] Deepen the 5 current scenarios with a code/data root cause (not just "scale the box")
-- [ ] Re-ground Arena = Mountkirk Games, Race Day = Helicopter Racing League
+**Phase 1 — depth everywhere:**
+- [x] Code+data lever model: **DB index** (full-scan penalty), **N+1** queries/request, **async vs blocking** I/O — in component evaluate(); node faces show flags. Verified.
+- [x] **Observability** component gates the failure diagnosis (none → blind; basic → hot boxes; full → root cause). Tutorial exempt.
+- [x] New **Profile Page** scenario (easy) showcasing it: a missing index / N+1 that scaling can't fix (verified: xlarge + 40 replicas still fail and bust budget; the index/batch is the fix).
+- [ ] Deepen the OTHER existing scenarios with a code/data root cause where it fits
+- [ ] Re-ground Arena = Mountkirk Games, Race Day = Helicopter Racing League (needs mechanic fit, not just copy)
 - Phase 2 Security · Phase 3 Delivery/Ops · Phase 4 Incidents (see spec)
 
 ## Design language (decided — keep continuity)

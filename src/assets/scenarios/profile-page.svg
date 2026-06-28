@@ -1,0 +1,25 @@
+<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="180" fill="#141a24"/>
+  <g stroke="#2a3645" stroke-width="1">
+    <path d="M0 45H320M0 90H320M0 135H320M45 0V180M90 0V180M135 0V180M180 0V180M225 0V180M270 0V180"/>
+  </g>
+  <!-- a slow page: spinner + profile skeleton -->
+  <rect x="40" y="44" width="120" height="92" rx="8" fill="#1b2330" stroke="#2f3c4d"/>
+  <circle cx="66" cy="70" r="11" fill="#5aa2ff" fill-opacity="0.6"/>
+  <rect x="84" y="63" width="60" height="5" rx="2" fill="#5b6b80"/>
+  <rect x="84" y="74" width="40" height="5" rx="2" fill="#3a4757"/>
+  <rect x="52" y="98" width="96" height="5" rx="2" fill="#3a4757"/>
+  <rect x="52" y="110" width="80" height="5" rx="2" fill="#3a4757"/>
+  <!-- loading spinner -->
+  <path d="M100 90 a14 14 0 1 1 -14 -14" stroke="#eab308" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- the culprit: a slow DB doing a full scan, lots of query arrows -->
+  <rect x="232" y="60" width="56" height="60" rx="6" fill="#1f2937" stroke="#f59e0b" stroke-width="2"/>
+  <path d="M244 74 h32 M244 84 h32 M244 94 h32 M244 104 h32" stroke="#f59e0b" stroke-opacity="0.5" stroke-width="2"/>
+  <text x="260" y="135" font-family="monospace" font-size="8" fill="#f59e0b" text-anchor="middle">SCAN</text>
+  <!-- N sequential query arrows app -> db -->
+  <g stroke="#ef4444" stroke-width="1.5" stroke-opacity="0.7">
+    <path d="M160 78 h64" stroke-dasharray="4 3"/>
+    <path d="M160 90 h64" stroke-dasharray="4 3"/>
+    <path d="M160 102 h64" stroke-dasharray="4 3"/>
+  </g>
+</svg>
