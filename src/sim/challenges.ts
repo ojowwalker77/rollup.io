@@ -283,7 +283,7 @@ export const HOTEL_BOOKING: Challenge = {
       ],
       brief: "Ride the daily peaks in reads while keeping the monthly bill in check.",
       concepts: ["Horizontal app scaling", "Cache memory → hit ratio", "Cost efficiency"],
-      hint: "More cache memory raises the hit ratio, which strips reads off the database — usually far cheaper than scaling the database vertically.",
+      hint: "Put the cache between the app and the database (app → cache → database) so reads hit it first. More cache memory raises the hit ratio, stripping reads off the database — usually far cheaper than scaling the database vertically.",
       reward: "You scaled reads without turning every problem into an expensive database upgrade. Promotion track: unlocked.",
       winLine: "more traffic, basically the same bill. that's the whole job, honestly. nice.",
       lossLine: "we drowned in reads. a bigger DB would've worked and cost a fortune — there's a cheaper lever. find it.",
