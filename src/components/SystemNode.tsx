@@ -29,8 +29,12 @@ function summary(type: string, c: Record<string, number | string>): string {
     case "mobile_client":
     case "partner_api":
       return `${Number(c.rps).toLocaleString()} rps · ${Math.round(Number(c.writeRatio) * 100)}% W`;
-    case "app_server":
-      return `${c.replicas}× · ${c.vcpus} vCPU`;
+    case "app_server": {
+      const flags: string[] = [];
+      if (Number(c.queriesPerReq) > 1) flags.push("N+1");
+      if (c.io === "blocking") flags.push("sync");
+      return `${c.replicas}× · ${c.vcpus} vCPU${flags.length ? ` · ${flags.join(" ")}` : ""}`;
+    }
     case "aws_ec2_asg":
     case "gcp_compute_mig":
       return `${c.instances} EC2 · ${c.vcpus} vCPU`;
@@ -66,7 +70,7 @@ function summary(type: string, c: Record<string, number | string>): string {
     case "aws_rds":
     case "aws_aurora":
     case "gcp_cloud_sql":
-      return `${c.tier} · ${c.readReplicas} replica${Number(c.readReplicas) === 1 ? "" : "s"}`;
+      return `${c.tier} · ${c.readReplicas} replica${Number(c.readReplicas) === 1 ? "" : "s"}${c.indexed === "no" ? " · no index" : ""}`;
     case "cache":
     case "redis":
     case "aws_elasticache_redis":

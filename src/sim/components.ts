@@ -123,11 +123,17 @@ function passThroughEval(
   };
 }
 
+/** Without an index, every query is a full table scan: far slower and far fewer
+ *  queries/sec on the same hardware. This is a DATA-layer lever — the fix is the
+ *  index, not a bigger instance. */
+const SCAN_PENALTY = 10;
+
 function sqlEval({ input, config }: EvalContext, tierScale = 1): NodeEval {
-  const base = (SQL_TIERS[String(config.tier)] ?? 6000) * tierScale;
+  const scan = String(config.indexed) === "no" ? SCAN_PENALTY : 1;
+  const base = ((SQL_TIERS[String(config.tier)] ?? 6000) * tierScale) / scan;
   const readReplicas = Number(config.readReplicas);
   const maxConn = Number(config.maxConnections);
-  const queryMs = Number(config.queryMs);
+  const queryMs = Number(config.queryMs) * scan;
 
   const reads = input.rps * (1 - input.writeRatio);
   const writes = input.rps * input.writeRatio;
@@ -143,7 +149,8 @@ function sqlEval({ input, config }: EvalContext, tierScale = 1): NodeEval {
   const utilization = Math.max(readUtil, writeUtil, connUtil);
   let bottleneck: string | undefined;
   if (utilization >= 0.9) {
-    if (utilization === writeUtil) bottleneck = "write throughput — single primary, add tier not replicas";
+    if (scan > 1) bottleneck = "unindexed full table scan — add an index before scaling the box";
+    else if (utilization === writeUtil) bottleneck = "write throughput — single primary, add tier not replicas";
     else if (utilization === readUtil) bottleneck = "read throughput — add replicas or a cache";
     else bottleneck = "connection pool exhausted";
   }
@@ -383,7 +390,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     label: "Stateless App Service",
     blurb: "Provider-neutral fleet of stateless service instances behind a load balancer: VMs, containers, or pods in real deployments.",
     accent: "#38bdf8",
-    defaults: { replicas: 1, vcpus: 2, cpuMsPerReq: 2, maxConcurrency: 256 },
+    defaults: { replicas: 1, vcpus: 2, cpuMsPerReq: 2, maxConcurrency: 256, queriesPerReq: 1, io: "async" },
     route: { role: "compute" },
     cost: (c) => Number(c.replicas) * Number(c.vcpus) * VCPU_USD_MO,
     fields: [
@@ -391,6 +398,11 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
       { key: "vcpus", label: "vCPU / replica", type: "number", min: 1, max: 64, step: 1, help: "Cores per instance. CPU-bound throughput = cores ÷ CPU-time-per-request." },
       { key: "cpuMsPerReq", label: "CPU per request", type: "number", min: 0.5, max: 200, step: 0.5, unit: "ms", help: "Compute cost of one request. Heavier handlers serve fewer rps per core." },
       { key: "maxConcurrency", label: "Max concurrency / replica", type: "number", min: 1, max: 4096, step: 1, help: "In-flight requests per instance. A slow downstream holds these open and can exhaust the pool even with spare CPU." },
+      { key: "queriesPerReq", label: "DB queries / request", type: "number", min: 1, max: 50, step: 1, help: "CODE lever. 1 = batched. Higher = the N+1 problem: each request fans into many datastore queries, multiplying load downstream. Fix the query, don't scale the DB." },
+      { key: "io", label: "I/O model", type: "select", options: [
+        { value: "async", label: "async (non-blocking)" },
+        { value: "blocking", label: "blocking" },
+      ], help: "CODE lever. Blocking holds a thread for the whole downstream round-trip, so a slow dependency exhausts the pool. Async frees the thread while it waits." },
     ],
     evaluate: ({ input, config, downstreamMs }: EvalContext): NodeEval => {
       const replicas = Number(config.replicas);
@@ -398,13 +410,17 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
       const cpuMs = Number(config.cpuMsPerReq);
       const maxConc = Number(config.maxConcurrency);
 
+      // CODE levers: N+1 makes `queriesPerReq` sequential downstream calls per
+      // request; blocking I/O holds the thread for the whole wait, async frees it.
+      const queriesPerReq = Math.max(1, Number(config.queriesPerReq ?? 1));
+      const blocking = String(config.io ?? "async") === "blocking";
+      const downstreamPerReq = queriesPerReq * downstreamMs; // N sequential round-trips
+
       // CPU-bound ceiling.
       const cpuCapacity = replicas * vcpus * (1000 / cpuMs);
 
-      // Concurrency ceiling: each in-flight request is held for the full
-      // round-trip (own CPU + waiting on downstream). Little's law:
-      //   max throughput = concurrency_pool / hold_time
-      const holdMs = cpuMs + downstreamMs;
+      // Concurrency ceiling (Little's law): max throughput = pool / hold_time.
+      const holdMs = cpuMs + (blocking ? downstreamPerReq : 0);
       const concCapacity = (replicas * maxConc) / (holdMs / 1000);
 
       const capacity = Math.min(cpuCapacity, concCapacity);
@@ -412,14 +428,19 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
       const bottleneck =
         utilization >= 0.9
           ? concCapacity < cpuCapacity
-            ? "thread pool — held open by slow downstream"
+            ? queriesPerReq > 1
+              ? "thread pool — N+1 queries holding threads on the downstream (batch the query)"
+              : blocking
+                ? "thread pool — blocking on a slow downstream (go async)"
+                : "thread pool — held open by slow downstream"
             : "CPU"
           : undefined;
 
       return {
         capacity,
         utilization,
-        serviceMs: queue(cpuMs, utilization),
+        // N+1 adds the latency of the extra sequential round-trips per request.
+        serviceMs: queue(cpuMs, utilization) + (queriesPerReq - 1) * downstreamMs,
         dropRate: shed(utilization),
         // Stateless tier forwards the surviving load to its dependencies.
         forward: { rps: input.rps * (1 - shed(utilization)), writeRatio: input.writeRatio },
@@ -463,7 +484,7 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     label: "SQL Database",
     blurb: "Relational primary + read replicas. Reads scale out; writes are stuck on the primary.",
     accent: "#f59e0b",
-    defaults: { tier: "medium", readReplicas: 0, maxConnections: 200, queryMs: 6 },
+    defaults: { tier: "medium", readReplicas: 0, maxConnections: 200, queryMs: 6, indexed: "yes" },
     route: { role: "store", serves: ["read", "write"] },
     cost: (c) => (SQL_TIER_USD[String(c.tier)] ?? 700) * (1 + Number(c.readReplicas) * 0.9),
     fields: [
@@ -473,6 +494,10 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
         { value: "large", label: "large · 7k qps" },
         { value: "xlarge", label: "xlarge · 18k qps" },
       ], help: "Vertical scale of the primary. This is the ONLY thing that raises write throughput." },
+      { key: "indexed", label: "Hot query index", type: "select", options: [
+        { value: "yes", label: "indexed" },
+        { value: "no", label: "no index (full scan)" },
+      ], help: "DATA lever. Without an index the hot query is a full table scan — ~10× slower and ~10× fewer qps. The fix is the index, not a bigger instance." },
       { key: "readReplicas", label: "Read replicas", type: "number", min: 0, max: 20, step: 1, help: "Each replica adds read capacity. Does nothing for writes — they must go to the primary." },
       { key: "maxConnections", label: "Connection pool", type: "number", min: 10, max: 5000, step: 10, help: "Concurrent connections. Slow queries hold connections longer and can exhaust the pool before CPU." },
       { key: "queryMs", label: "Base query latency", type: "number", min: 0.5, max: 200, step: 0.5, unit: "ms", help: "Service time of a typical query. Drives both latency and how long a connection is held." },
