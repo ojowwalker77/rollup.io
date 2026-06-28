@@ -8,7 +8,7 @@ export const HOTEL: Scenario = {
     "The fundamentals on a transactional booking site: wire a request path, take reads off the database with a cache, survive a write spike, then make it cheap.",
   teaches: ["Request path", "Caching", "Write scaling", "Cost"],
   art: "/assets/scenarios/hotel.svg",
-  components: ["app_server", "sql", "cache", "object_store"],
+  components: ["app_server", "sql", "cache", "object_store", "observability"],
   levels: [
     {
       id: "l1-launch",

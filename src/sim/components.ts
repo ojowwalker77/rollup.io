@@ -770,6 +770,24 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     },
   },
 
+  observability: {
+    type: "observability",
+    category: "observability",
+    label: "Observability",
+    blurb: "Metrics, logs, and traces. Doesn't serve traffic — it's how you SEE the system. Without it, an incident is a guessing game and your post-mortem comes back blind.",
+    accent: "#eab308",
+    defaults: { coverage: "full" },
+    route: { role: "store", serves: [] }, // inert — never in the request path
+    cost: (c) => (String(c.coverage) === "basic" ? 120 : 300),
+    fields: [
+      { key: "coverage", label: "Signals", type: "select", options: [
+        { value: "basic", label: "metrics only" },
+        { value: "full", label: "metrics + logs + traces" },
+      ], help: "Metrics tell you SOMETHING broke; logs + traces tell you WHERE. Full coverage costs more but turns an outage into a fix instead of a guess." },
+    ],
+    evaluate: (): NodeEval => ({ capacity: Infinity, utilization: 0, serviceMs: 0, dropRate: 0, forward: SINK }),
+  },
+
   // ----------------------------------------------------------- REAL AWS SURFACE
   web_client: {
     type: "web_client",

@@ -111,6 +111,8 @@ function summary(type: string, c: Record<string, number | string>): string {
       const hit = Math.min(Number(c.memoryGB) / Math.max(Number(c.workingSetGB), 0.001), 0.95);
       return `${c.replicas} GPU · ${Math.round(hit * 100)}% cached`;
     }
+    case "observability":
+      return c.coverage === "full" ? "metrics · logs · traces" : "metrics only";
     case "aws_sqs":
       return `${c.queues} queues · ${c.consumers} consumers`;
     case "gcp_pubsub":
@@ -150,6 +152,7 @@ export function SystemNode({ id, data, selected }: NodeProps) {
   const ev = useStore((s) => s.evalResult.nodes[id]);
   const runPhase = useStore((s) => s.runPhase);
   const isSource = spec.category === "source";
+  const isMonitor = spec.category === "observability";
   const hasRun = runPhase !== "build";
 
   const health = hasRun ? r?.health ?? "idle" : "idle";
@@ -198,8 +201,10 @@ export function SystemNode({ id, data, selected }: NodeProps) {
         {summary(d.type, d.config)}
       </div>
 
-      {isSource ? (
-        <div className="mt-2 h-[18px] text-[11px] leading-[18px] text-muted-foreground">traffic source</div>
+      {isSource || isMonitor ? (
+        <div className="mt-2 h-[18px] text-[11px] leading-[18px] text-muted-foreground">
+          {isMonitor ? "monitoring" : "traffic source"}
+        </div>
       ) : loaded ? (
         // Live: measured load, latency, and a health-colored utilization bar.
         <div className="mt-2">

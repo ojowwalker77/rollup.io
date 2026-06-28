@@ -1,10 +1,13 @@
 // Turn a failed run into a specific, teachable explanation — what broke and
-// what to do about it — instead of a generic "you lost" message. Everything
-// here is read straight from the simulation result.
+// what to do about it. How MUCH you can see depends on the observability you
+// wired: full (metrics+logs+traces) → root cause; basic (metrics) → which
+// component is hot; none → you're flying blind. That's MTTR, made tangible.
 
 import { specOf } from "./components";
 import type { Level } from "./scenarios";
 import type { ReqClass, SimResult } from "./types";
+
+export type ObsLevel = "none" | "basic" | "full";
 
 const CLASS_INFO: Record<ReqClass, { what: string; fix: string }> = {
   read: { what: "reads", fix: "add a cache (in series) or read replicas and scale the read path" },
@@ -24,10 +27,15 @@ export interface Diagnosis {
 
 const pctNeed = (a: number) => `${(a * 100).toFixed(a >= 0.999 ? 1 : 0)}%`;
 
-export function diagnoseLoss(level: Level, result: SimResult, lostCustomers: boolean): Diagnosis {
+export function diagnoseLoss(
+  level: Level,
+  result: SimResult,
+  lostCustomers: boolean,
+  obs: ObsLevel = "full",
+): Diagnosis {
   const m = result.metrics;
 
-  // Survived the SLA but the design was too expensive.
+  // Cost is always visible (it's the bill, not telemetry).
   if (!lostCustomers) {
     const over = Math.max(0, m.totalCostUsd - level.budgetUsd);
     const costly = Object.values(result.nodes)
@@ -41,9 +49,41 @@ export function diagnoseLoss(level: Level, result: SimResult, lostCustomers: boo
     };
   }
 
-  const points: string[] = [];
+  // The outcome (headline) is observable from users / the run, regardless of o11y.
+  let headline: string;
+  if (m.p99Ms > level.sla.p99Ms && m.availability >= level.sla.availability) {
+    headline = `Too slow — p99 hit ${Math.round(m.p99Ms)}ms (target ${level.sla.p99Ms}ms)`;
+  } else if (m.availability < level.sla.availability) {
+    headline = `Requests were failing — ${pctNeed(m.availability)} served, need ${pctNeed(level.sla.availability)}`;
+  } else {
+    headline = "The design buckled under load";
+  }
 
-  // 1) Classes of traffic that had no handler or not enough capacity.
+  // Flying blind: you see it broke, not why.
+  if (obs === "none") {
+    return {
+      headline,
+      points: [
+        "No observability wired — you can see it broke, but not why.",
+        "Add metrics/logs/traces and run it back: that gap is your MTTR.",
+      ],
+    };
+  }
+
+  // Metrics-only: you can see which boxes are hot, not the root cause.
+  if (obs === "basic") {
+    const hot = Object.values(result.nodes)
+      .filter((n) => n.health === "fail" || n.health === "hot")
+      .sort((a, b) => b.utilization - a.utilization)
+      .map((n) => specOf(n.type).label);
+    const points = hot.length
+      ? [`Metrics show these running hot: ${[...new Set(hot)].join(", ")}.`, "Add logs + traces (full observability) to see the root cause."]
+      : ["Metrics look healthy but requests are still failing — add logs + traces to see where they're going."];
+    return { headline, points };
+  }
+
+  // Full observability: root cause + fix.
+  const points: string[] = [];
   const starved = (Object.keys(result.classes) as ReqClass[])
     .map((c) => ({ c, ...result.classes[c] }))
     .filter((x) => x.offered > 1 && x.served / x.offered < 0.98)
@@ -52,15 +92,11 @@ export function diagnoseLoss(level: Level, result: SimResult, lostCustomers: boo
     const lost = Math.round((1 - s.served / s.offered) * 100);
     points.push(`${lost}% of ${CLASS_INFO[s.c].what} never got served — ${CLASS_INFO[s.c].fix}.`);
   }
-
-  // 2) Components that saturated (the engine already names why).
   const hot = Object.values(result.nodes)
     .filter((n) => n.bottleneck && (n.health === "fail" || n.health === "hot"))
     .sort((a, b) => b.utilization - a.utilization)
     .slice(0, 3);
   for (const n of hot) points.push(`${specOf(n.type).label} saturated — ${n.bottleneck}.`);
-
-  // 3) A pure latency failure (everything served, but too slowly).
   if (m.p99Ms > level.sla.p99Ms && starved.length === 0 && hot.length === 0) {
     const slow = Object.values(result.nodes)
       .filter((n) => n.input.rps > 1 && specOf(n.type).category !== "source")
@@ -71,16 +107,6 @@ export function diagnoseLoss(level: Level, result: SimResult, lostCustomers: boo
       );
     }
   }
-
-  let headline: string;
-  if (m.p99Ms > level.sla.p99Ms && m.availability >= level.sla.availability) {
-    headline = `Too slow — p99 hit ${Math.round(m.p99Ms)}ms (target ${level.sla.p99Ms}ms)`;
-  } else if (m.availability < level.sla.availability) {
-    headline = `Requests were failing — ${pctNeed(m.availability)} served, need ${pctNeed(level.sla.availability)}`;
-  } else {
-    headline = "The design buckled under load";
-  }
   if (points.length === 0) points.push("The SLA slipped under peak load — give the busiest tier more headroom.");
-
   return { headline, points };
 }

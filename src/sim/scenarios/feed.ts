@@ -12,7 +12,7 @@ export const FEED: Scenario = {
     "A personalized recommendation feed backed by an ML model. Every open runs inference on costly GPUs — serve the feed fast without a runaway GPU bill by caching hot predictions.",
   teaches: ["ML inference", "GPU cost", "Caching predictions", "Compute vs cache"],
   art: "/assets/scenarios/foryou-feed.svg",
-  components: ["api_gateway", "app_server", "cache", "redis", "sql", "inference_server"],
+  components: ["api_gateway", "app_server", "cache", "redis", "sql", "inference_server", "observability"],
   levels: [
     {
       id: "feed-l1-personalize",

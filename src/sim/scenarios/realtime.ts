@@ -13,7 +13,7 @@ export const LIVE_CHAT: Scenario = {
     "A real-time chat for live streams. Live messages must be pushed to every viewer over persistent connections — a different tier from the request/response API, and the firehose has to be persisted without slowing delivery.",
   teaches: ["WebSockets", "Message fanout", "Realtime vs API tier", "Write-scaled history"],
   art: "/assets/scenarios/live-chat.svg",
-  components: ["api_gateway", "app_server", "cache", "redis", "sql", "nosql", "realtime_gateway"],
+  components: ["api_gateway", "app_server", "cache", "redis", "sql", "nosql", "realtime_gateway", "observability"],
   levels: [
     {
       id: "lc-l1-golive",

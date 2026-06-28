@@ -1,4 +1,5 @@
 import {
+  Activity,
   Boxes,
   Cpu,
   Database,
@@ -73,6 +74,7 @@ const LUCIDE_ICONS: Record<string, LucideIcon> = {
   event_queue: Send,
   realtime_gateway: Radio,
   inference_server: Cpu,
+  observability: Activity,
   gcp_cloud_load_balancing: Network,
   gcp_api_gateway: Gauge,
   gcp_cloud_cdn: RadioTower,

@@ -13,7 +13,7 @@ export const NEWS: Scenario = {
     "A news site where one story can hit the front page in minutes. Serve articles and images from the edge so readers get low latency and the slow origin store isn't on the hot path.",
   teaches: ["CDN edge cache", "Origin offload", "Hit ratio → latency", "p99"],
   art: "/assets/scenarios/breaking-news.svg",
-  components: ["app_server", "sql", "cache", "cdn", "object_store"],
+  components: ["app_server", "sql", "cache", "cdn", "object_store", "observability"],
   levels: [
     {
       id: "news-l1-publish",
