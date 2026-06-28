@@ -17,9 +17,9 @@ export function GameOver() {
   const backToBuild = useStore((s) => s.backToBuild);
   const reputation = useStore((s) => s.reputation);
   const cost = useStore((s) => s.result.metrics.totalCostUsd);
-  const challenge = useStore((s) => s.challenge);
+  const scenario = useStore((s) => s.scenario);
   const levelIndex = useStore((s) => s.levelIndex);
-  const level = challenge.levels[levelIndex]!;
+  const level = scenario.levels[levelIndex]!;
 
   const lostCustomers = reputation <= 0;
 
@@ -37,16 +37,6 @@ export function GameOver() {
               : "You held the SLA, but the design blew past the monthly budget."}
           </DialogDescription>
         </DialogHeader>
-
-        {/* The lead reacts — failure gets direction, not mood. */}
-        <div className="flex items-start gap-2.5">
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-sm font-semibold text-primary-foreground">
-            {challenge.cast.name.charAt(0)}
-          </span>
-          <p className="w-fit max-w-[88%] rounded-2xl rounded-tl-sm bg-muted px-3.5 py-2 text-sm leading-relaxed text-foreground/90">
-            {lostCustomers ? level.lossLine : "the SLA held — this one's just the bill. trim the over-provisioned boxes and run it back."}
-          </p>
-        </div>
 
         <div className="space-y-1.5 rounded-lg border border-border bg-background/50 p-3 text-sm">
           <div className="flex justify-between">

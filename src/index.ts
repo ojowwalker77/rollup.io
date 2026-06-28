@@ -15,12 +15,12 @@ const server = serve({
       return new Response(file, { headers: { "Content-Type": "image/svg+xml" } });
     },
 
-    "/assets/story/:name": async req => {
+    "/assets/scenarios/:name": async req => {
       const name = req.params.name;
       if (!/^[A-Za-z0-9_.-]+\.svg$/.test(name)) {
         return new Response("Not found", { status: 404 });
       }
-      const file = Bun.file(new URL(`./assets/story/${name}`, import.meta.url));
+      const file = Bun.file(new URL(`./assets/scenarios/${name}`, import.meta.url));
       if (!(await file.exists())) {
         return new Response("Not found", { status: 404 });
       }

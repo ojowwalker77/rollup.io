@@ -11,7 +11,7 @@ import {
 import { create } from "zustand";
 import { specOf } from "./sim/components";
 import { runSimulation, type SimEdge, type SimNode } from "./sim/engine";
-import { CHALLENGES, HOTEL_BOOKING, profileAt, type Challenge, type HostingMode, type Level } from "./sim/challenges";
+import { DEFAULT_SCENARIO, SCENARIOS, profileAt, type Level, type Scenario } from "./sim/scenarios";
 import type { Config, Metrics, SimResult } from "./sim/types";
 
 export interface SystemNodeData extends Record<string, unknown> {
@@ -74,8 +74,7 @@ const ZERO_METRICS: Metrics = {
 
 interface State {
   screen: "home" | "play";
-  challenge: Challenge;
-  hostingMode: HostingMode;
+  scenario: Scenario;
   levelIndex: number;
   nodes: FlowNode[];
   edges: Edge[];
@@ -103,8 +102,7 @@ interface State {
   deleteNode: (id: string) => void;
   select: (id: string | null) => void;
   selectEdge: (id: string | null) => void;
-  selectChallenge: (id: string, mode?: HostingMode) => void;
-  availableComponents: () => string[];
+  selectScenario: (id: string) => void;
   goHome: () => void;
   setTraffic: (t: number) => void;
   setBriefing: (open: boolean) => void;
@@ -172,13 +170,12 @@ function lerpMetrics(from: Metrics, to: Metrics, k: number): Metrics {
   };
 }
 
-const level0 = HOTEL_BOOKING.levels[0]!;
+const level0 = DEFAULT_SCENARIO.levels[0]!;
 const board0 = buildBoard(level0);
 
 export const useStore = create<State>()((set, get) => ({
   screen: "home",
-  challenge: HOTEL_BOOKING,
-  hostingMode: "generic",
+  scenario: DEFAULT_SCENARIO,
   levelIndex: 0,
   nodes: board0.nodes,
   edges: board0.edges,
@@ -211,7 +208,7 @@ export const useStore = create<State>()((set, get) => ({
   addComponent: (type, position) => {
     if (get().runPhase === "live") return;
     const spec = specOf(type);
-    if (spec.category === "source" || !get().availableComponents().includes(type)) return;
+    if (spec.category === "source" || !get().scenario.components.includes(type)) return;
     const seq = get().seq + 1;
     const id = `${type}-${seq}`;
     const pos = position ?? { x: 360 + (seq % 5) * 40, y: 360 + (seq % 3) * 36 };
@@ -251,15 +248,13 @@ export const useStore = create<State>()((set, get) => ({
   setTraffic: (t) => set({ traffic: t }),
   setBriefing: (open) => set({ briefingOpen: open }),
 
-  selectChallenge: (id, mode = "generic") => {
-    const challenge = CHALLENGES.find((c) => c.id === id) ?? HOTEL_BOOKING;
-    const level = challenge.levels[0]!;
+  selectScenario: (id) => {
+    const scenario = SCENARIOS.find((s) => s.id === id) ?? DEFAULT_SCENARIO;
+    const level = scenario.levels[0]!;
     const board = buildBoard(level);
-    const hostingMode: HostingMode = "generic";
     set({
       screen: "play",
-      challenge,
-      hostingMode,
+      scenario,
       levelIndex: 0,
       nodes: board.nodes,
       edges: board.edges,
@@ -276,11 +271,6 @@ export const useStore = create<State>()((set, get) => ({
       display: ZERO_METRICS,
       seq: 0,
     });
-  },
-
-  availableComponents: () => {
-    const { challenge, hostingMode } = get();
-    return challenge.componentCatalogs[hostingMode] ?? challenge.componentCatalogs.generic;
   },
 
   goHome: () =>
@@ -313,8 +303,8 @@ export const useStore = create<State>()((set, get) => ({
   backToBuild: () => set({ runPhase: "build", clock: 0, history: [], reputation: 100 }),
 
   resetLevel: () => {
-    const { challenge, levelIndex } = get();
-    const level = challenge.levels[levelIndex]!;
+    const { scenario, levelIndex } = get();
+    const level = scenario.levels[levelIndex]!;
     const board = buildBoard(level);
     set({
       nodes: board.nodes,
@@ -333,9 +323,9 @@ export const useStore = create<State>()((set, get) => ({
   // Each level opens from its own inherited board (a starter architecture
   // missing the piece that level teaches), or blank for the from-scratch beats.
   nextLevel: () => {
-    const { levelIndex, challenge } = get();
+    const { levelIndex, scenario } = get();
     const ni = levelIndex + 1;
-    const level = challenge.levels[ni];
+    const level = scenario.levels[ni];
     if (!level) {
       set({ runPhase: "build" });
       return;
@@ -359,8 +349,8 @@ export const useStore = create<State>()((set, get) => ({
 
   tick: () => {
     const s = get();
-    const { nodes, edges, runPhase, traffic, display, challenge, levelIndex } = s;
-    const level = challenge.levels[levelIndex]!;
+    const { nodes, edges, runPhase, traffic, display, scenario, levelIndex } = s;
+    const level = scenario.levels[levelIndex]!;
     const sim = toSim(nodes);
     const se = toSimEdges(edges);
 

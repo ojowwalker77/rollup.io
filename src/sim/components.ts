@@ -684,6 +684,34 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     },
   },
 
+  realtime_gateway: {
+    type: "realtime_gateway",
+    category: "networking",
+    label: "Realtime Gateway",
+    blurb: "WebSocket/SSE tier that holds live connections and pushes messages to subscribers in real time — separate from the request/response API path.",
+    accent: "#f472b6",
+    defaults: { instances: 4, throughputK: 8, fanoutMs: 8 },
+    route: { role: "store", serves: ["realtime"] },
+    cost: (c) => Number(c.instances) * 120,
+    fields: [
+      { key: "instances", label: "Gateway instances", type: "number", min: 1, max: 500, step: 1, help: "Each instance holds a pool of live connections and pushes messages. Scale out as concurrent viewers grow." },
+      { key: "throughputK", label: "Deliveries / instance", type: "number", min: 1, max: 200, step: 1, unit: "k/s", help: "Sustained message pushes per second per instance (thousands). Fanning one message to many subscribers multiplies this fast." },
+      { key: "fanoutMs", label: "Push latency", type: "number", min: 1, max: 100, step: 1, unit: "ms", help: "Time to fan a published message out to connected subscribers." },
+    ],
+    evaluate: ({ input, config }: EvalContext): NodeEval => {
+      const capacity = Number(config.instances) * Number(config.throughputK) * 1000;
+      const utilization = capacity > 0 ? input.rps / capacity : Infinity;
+      return {
+        capacity,
+        utilization,
+        serviceMs: queue(Number(config.fanoutMs), utilization),
+        dropRate: shed(utilization),
+        forward: SINK,
+        bottleneck: utilization >= 0.9 ? "realtime delivery throughput — add gateway instances" : undefined,
+      };
+    },
+  },
+
   // ----------------------------------------------------------- REAL AWS SURFACE
   web_client: {
     type: "web_client",

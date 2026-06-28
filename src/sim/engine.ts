@@ -42,7 +42,7 @@ export interface SimEdge {
 const EPS = 1e-9;
 
 function zeroClass(): ClassFlow {
-  return { read: 0, write: 0, kv: 0, media: 0, search: 0, event: 0 };
+  return { read: 0, write: 0, kv: 0, media: 0, search: 0, event: 0, realtime: 0 };
 }
 function totalOf(f: ClassFlow): number {
   let s = 0;

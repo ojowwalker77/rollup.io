@@ -24,7 +24,7 @@ const GROUPS: { key: Category; label: string }[] = [
 export function Palette() {
   const [q, setQ] = useState("");
   const addComponent = useStore((s) => s.addComponent);
-  const allowed = useStore((s) => s.availableComponents());
+  const allowed = useStore((s) => s.scenario.components);
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();

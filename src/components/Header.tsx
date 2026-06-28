@@ -8,7 +8,7 @@ function usd(n: number): string {
 }
 
 export function Header() {
-  const challenge = useStore((s) => s.challenge);
+  const scenario = useStore((s) => s.scenario);
   const levelIndex = useStore((s) => s.levelIndex);
   const cost = useStore((s) => s.result.metrics.totalCostUsd);
   const runPhase = useStore((s) => s.runPhase);
@@ -20,10 +20,10 @@ export function Header() {
   const theme = useStore((s) => s.theme);
   const toggleTheme = useStore((s) => s.toggleTheme);
 
-  const level = challenge.levels[levelIndex]!;
+  const level = scenario.levels[levelIndex]!;
   const overBudget = cost > level.budgetUsd;
   const passed = bestCost[level.id] !== undefined;
-  const canAdvance = passed && runPhase === "build" && levelIndex + 1 < challenge.levels.length;
+  const canAdvance = passed && runPhase === "build" && levelIndex + 1 < scenario.levels.length;
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-card/40 px-4">
@@ -36,12 +36,9 @@ export function Header() {
             rollup<span className="text-primary">.io</span>
           </h1>
           <p className="mt-1 font-mono text-[11px] leading-none text-muted-foreground">
-            {challenge.title} · L{levelIndex + 1} {level.name}
+            {scenario.title} · L{levelIndex + 1} {level.name}
           </p>
         </div>
-        <span className="ml-1 hidden rounded-full border border-primary/30 bg-primary/10 px-2 py-0.5 font-mono text-[10px] text-primary md:inline">
-          {level.rank}
-        </span>
       </div>
 
       <div className="flex items-center gap-3">

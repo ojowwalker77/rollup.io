@@ -1,7 +1,7 @@
 import { BookOpen, Check, CircleDashed, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { goalsFromSla } from "../sim/challenges";
+import { goalsFromSla } from "../sim/scenarios";
 import { useStore } from "../store";
 
 const usd = (n: number) => (n === Infinity ? "∞" : `$${Math.round(n).toLocaleString()}`);
@@ -35,12 +35,12 @@ function GoalRow({ ok, evaluated, label, target, actual }: {
 }
 
 export function ChallengePanel() {
-  const challenge = useStore((s) => s.challenge);
+  const scenario = useStore((s) => s.scenario);
   const levelIndex = useStore((s) => s.levelIndex);
   const m = useStore((s) => s.result.metrics);
   const runPhase = useStore((s) => s.runPhase);
   const setBriefing = useStore((s) => s.setBriefing);
-  const level = challenge.levels[levelIndex]!;
+  const level = scenario.levels[levelIndex]!;
   const goals = goalsFromSla(level);
 
   const live = runPhase === "live" && m.offeredRps > 1;

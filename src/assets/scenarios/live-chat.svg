@@ -1,0 +1,25 @@
+<svg width="320" height="160" viewBox="0 0 320 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="160" fill="#141a24"/>
+  <g stroke="#2a3645" stroke-width="1">
+    <path d="M0 40H320M0 80H320M0 120H320M40 0V160M80 0V160M120 0V160M160 0V160M200 0V160M240 0V160M280 0V160"/>
+  </g>
+  <!-- central realtime hub -->
+  <circle cx="160" cy="80" r="20" fill="#1f2937" stroke="#f472b6" stroke-width="2"/>
+  <circle cx="160" cy="80" r="30" stroke="#f472b6" stroke-width="1" stroke-opacity="0.4"/>
+  <circle cx="160" cy="80" r="42" stroke="#f472b6" stroke-width="1" stroke-opacity="0.2"/>
+  <!-- fanout connections to viewers -->
+  <g stroke="#5aa2ff" stroke-width="1.5" stroke-opacity="0.7">
+    <path d="M160 80L60 36"/><path d="M160 80L60 124"/><path d="M160 80L260 36"/>
+    <path d="M160 80L260 124"/><path d="M160 80L52 80"/><path d="M160 80L268 80"/>
+  </g>
+  <!-- viewer nodes -->
+  <g fill="#5aa2ff">
+    <circle cx="56" cy="34" r="5"/><circle cx="56" cy="126" r="5"/><circle cx="264" cy="34" r="5"/>
+    <circle cx="264" cy="126" r="5"/><circle cx="48" cy="80" r="5"/><circle cx="272" cy="80" r="5"/>
+  </g>
+  <!-- chat bubbles -->
+  <g fill="#f472b6">
+    <rect x="146" y="71" width="16" height="11" rx="3"/>
+  </g>
+  <rect x="150" y="80" width="6" height="5" fill="#f472b6" transform="rotate(20 150 80)"/>
+</svg>

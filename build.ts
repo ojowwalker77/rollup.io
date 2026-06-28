@@ -27,6 +27,6 @@ await cp(path.join(process.cwd(), "src/assets/aws-icons"), path.join(outdir, "as
   recursive: true,
 });
 
-await cp(path.join(process.cwd(), "src/assets/story"), path.join(outdir, "assets/story"), {
+await cp(path.join(process.cwd(), "src/assets/scenarios"), path.join(outdir, "assets/scenarios"), {
   recursive: true,
 });

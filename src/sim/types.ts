@@ -40,8 +40,8 @@ export type Config = Record<string, number | string>;
 /** The kinds of request a workload is made of. Each class is served by a
  *  specific capability, so wiring the right component for each class is the
  *  whole game: a class with no handler on its path simply fails. */
-export type ReqClass = "read" | "write" | "kv" | "media" | "search" | "event";
-export const REQ_CLASSES: readonly ReqClass[] = ["read", "write", "kv", "media", "search", "event"];
+export type ReqClass = "read" | "write" | "kv" | "media" | "search" | "event" | "realtime";
+export const REQ_CLASSES: readonly ReqClass[] = ["read", "write", "kv", "media", "search", "event", "realtime"];
 
 /** Requests/sec broken down by class. */
 export type ClassFlow = Record<ReqClass, number>;

@@ -78,8 +78,15 @@ Respect reduced-motion. Keyboard focus visible.
 - [ ] Empty/idle/error states get the same voice (no dead dashboard text)
 
 ### Boards & modes
-- [x] Story mode starts from inherited starter boards, not blank — each missing the piece
-      that level teaches. Blank only at Hotel L1 (wiring tutorial) + ACME L1 (founder start).
+- [x] Dropped story mode → difficulty-sorted **scenario library** (easy → hard). No ranks,
+      cast, threads, or career campaign. Each scenario is a standalone challenge.
+- [x] Refactored the monolithic `challenges.ts` into `src/sim/scenarios/` — one file per
+      scenario (`hotel`, `realtime`, `acme`) + `types.ts` + `index.ts` registry.
+- [x] New scenario **Live Stream Chat** (medium): opens the real-time area — a `realtime`
+      request class + WebSocket `realtime_gateway` (persistent connections / message fanout),
+      separate from the request/response API tier. L1 add the gateway, L2 persist the firehose.
+- [ ] FOLLOW-UP: split the 1500-line `components.ts` too (core / dormant cloud / shared evals).
+- [x] Story-mode starters retained as inherited boards, each missing the piece its level teaches.
 - [x] Make the missing piece *mechanically* necessary. Engine now uses TYPED traffic
       (read/write/kv/media/search/event) with reachability routing: a class only flows
       toward a component that can serve it, and a class with no handler simply fails.

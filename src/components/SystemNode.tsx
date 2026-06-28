@@ -101,6 +101,8 @@ function summary(type: string, c: Record<string, number | string>): string {
       return `${c.nodes} nodes · ${c.shardGb}GB shards`;
     case "event_queue":
       return `${c.partitions} partitions · ${c.consumers} consumers`;
+    case "realtime_gateway":
+      return `${c.instances}× · ${c.throughputK}k/s push`;
     case "aws_sqs":
       return `${c.queues} queues · ${c.consumers} consumers`;
     case "gcp_pubsub":

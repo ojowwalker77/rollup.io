@@ -5,9 +5,9 @@ export function Timeline() {
   const runPhase = useStore((s) => s.runPhase);
   const reputation = useStore((s) => s.reputation);
   const clock = useStore((s) => s.clock);
-  const challenge = useStore((s) => s.challenge);
+  const scenario = useStore((s) => s.scenario);
   const levelIndex = useStore((s) => s.levelIndex);
-  const level = challenge.levels[levelIndex]!;
+  const level = scenario.levels[levelIndex]!;
 
   if (runPhase === "build" || history.length === 0) return null;
 
