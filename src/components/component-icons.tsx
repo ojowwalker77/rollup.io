@@ -1,5 +1,6 @@
 import {
   Boxes,
+  Cpu,
   Database,
   Gauge,
   Globe,
@@ -71,6 +72,7 @@ const LUCIDE_ICONS: Record<string, LucideIcon> = {
   search_index: Search,
   event_queue: Send,
   realtime_gateway: Radio,
+  inference_server: Cpu,
   gcp_cloud_load_balancing: Network,
   gcp_api_gateway: Gauge,
   gcp_cloud_cdn: RadioTower,

@@ -2,11 +2,14 @@
 // here and dropping it into this list at the right difficulty.
 
 import { ACME_MUSIC } from "./acme";
+import { FEED } from "./feed";
 import { HOTEL } from "./hotel";
+import { NEWS } from "./news";
 import { LIVE_CHAT } from "./realtime";
 import type { Scenario } from "./types";
 
-export const SCENARIOS: Scenario[] = [HOTEL, LIVE_CHAT, ACME_MUSIC];
+// Ordered easy → hard.
+export const SCENARIOS: Scenario[] = [HOTEL, NEWS, LIVE_CHAT, FEED, ACME_MUSIC];
 
 export const DEFAULT_SCENARIO: Scenario = HOTEL;
 

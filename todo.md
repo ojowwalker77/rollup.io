@@ -85,7 +85,15 @@ Respect reduced-motion. Keyboard focus visible.
 - [x] New scenario **Live Stream Chat** (medium): opens the real-time area — a `realtime`
       request class + WebSocket `realtime_gateway` (persistent connections / message fanout),
       separate from the request/response API tier. L1 add the gateway, L2 persist the firehose.
+- [x] Added two more scenarios, each a new concept:
+  - **Breaking News** (easy): CDN edge caching — fails on **p99 / latency** (a new axis;
+    everything else fails on availability). Misses pay slow origin TTFB → raise edge hit ratio.
+  - **ForYou Feed** (medium): **ML inference** — new `inference` class + GPU `inference_server`
+    with a prediction-cache hit ratio. Brute-forcing GPUs blows the budget (verified: 50 GPUs
+    still fails + costs 1.7× budget); caching predictions is the only way to fit.
 - [ ] FOLLOW-UP: split the 1500-line `components.ts` too (core / dormant cloud / shared evals).
+- [ ] FOLLOW-UP: working-set is a player-editable field on cache/redis/inference, so hit ratio
+      is gameable (set working-set = 1). Make it a fixed workload property to close the exploit.
 - [x] Story-mode starters retained as inherited boards, each missing the piece its level teaches.
 - [x] Make the missing piece *mechanically* necessary. Engine now uses TYPED traffic
       (read/write/kv/media/search/event) with reachability routing: a class only flows

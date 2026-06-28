@@ -712,6 +712,39 @@ export const COMPONENTS: Record<string, ComponentSpec> = {
     },
   },
 
+  inference_server: {
+    type: "inference_server",
+    category: "compute",
+    label: "Inference Server",
+    blurb: "GPU model-serving tier for recommendations and ranking. Each prediction is expensive — cache hot predictions to cut GPU calls before adding more GPUs.",
+    accent: "#a855f7",
+    defaults: { replicas: 6, perReplicaRps: 200, modelMs: 55, memoryGB: 8, workingSetGB: 40 },
+    route: { role: "store", serves: ["inference"] },
+    cost: (c) => Number(c.replicas) * 450 + Number(c.memoryGB) * 4,
+    fields: [
+      { key: "replicas", label: "GPU replicas", type: "number", min: 1, max: 200, step: 1, help: "GPU model servers. Throughput scales with replicas, but GPUs are expensive — cache before you scale." },
+      { key: "perReplicaRps", label: "Predictions / replica", type: "number", min: 10, max: 5000, step: 10, unit: "rps", help: "Sustained predictions per second a single GPU replica can serve." },
+      { key: "modelMs", label: "Inference latency", type: "number", min: 5, max: 500, step: 5, unit: "ms", help: "Time to run the model on a cache miss. Bigger models are smarter but slower and need more GPUs." },
+      { key: "memoryGB", label: "Prediction cache", type: "number", min: 1, max: 4096, step: 1, unit: "GB", help: "Memoized hot predictions. A cache hit skips the GPU entirely — far cheaper than another replica." },
+      { key: "workingSetGB", label: "Distinct predictions", type: "number", min: 1, max: 8192, step: 1, unit: "GB", help: "Spread of predictions actually requested. If it dwarfs the cache, most requests miss and hit the GPU." },
+    ],
+    evaluate: ({ input, config }: EvalContext): NodeEval => {
+      const hit = Math.min(Number(config.memoryGB) / Math.max(Number(config.workingSetGB), 0.001), 0.95);
+      const modelMs = Number(config.modelMs);
+      const misses = input.rps * (1 - hit); // only misses hit the GPU
+      const capacity = Number(config.replicas) * Number(config.perReplicaRps);
+      const utilization = capacity > 0 ? misses / capacity : Infinity;
+      return {
+        capacity,
+        utilization,
+        serviceMs: 3 * hit + (1 - hit) * queue(modelMs, utilization),
+        dropRate: (1 - hit) * shed(utilization), // cached predictions never fail
+        forward: SINK,
+        bottleneck: utilization >= 0.9 ? "GPU inference capacity — cache predictions or add replicas" : undefined,
+      };
+    },
+  },
+
   // ----------------------------------------------------------- REAL AWS SURFACE
   web_client: {
     type: "web_client",

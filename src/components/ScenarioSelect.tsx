@@ -1,4 +1,4 @@
-import { ArrowRight, Moon, Network, Play, Radio, Star, Sun } from "lucide-react";
+import { ArrowRight, Moon, Network, Newspaper, Play, Radio, Sparkles, Star, Sun } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SCENARIOS, type Scenario } from "../sim/scenarios";
@@ -6,7 +6,9 @@ import { useStore } from "../store";
 
 const ICONS: Record<string, typeof Network> = {
   "hotel-booking": Network,
+  "breaking-news": Newspaper,
   "live-chat": Radio,
+  "foryou-feed": Sparkles,
   "acme-music": Play,
 };
 

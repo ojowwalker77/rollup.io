@@ -1,0 +1,24 @@
+<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="180" fill="#141a24"/>
+  <g stroke="#2a3645" stroke-width="1">
+    <path d="M0 45H320M0 90H320M0 135H320M45 0V180M90 0V180M135 0V180M180 0V180M225 0V180M270 0V180"/>
+  </g>
+  <!-- origin store (slow, far) -->
+  <rect x="248" y="120" width="44" height="34" rx="4" fill="#1f2937" stroke="#fb923c" stroke-width="2"/>
+  <text x="270" y="141" font-family="monospace" font-size="9" fill="#fb923c" text-anchor="middle">origin</text>
+  <!-- edge node (fast, near readers) -->
+  <rect x="28" y="74" width="56" height="40" rx="5" fill="#1f2937" stroke="#22c55e" stroke-width="2"/>
+  <text x="56" y="98" font-family="monospace" font-size="10" fill="#22c55e" text-anchor="middle">edge</text>
+  <!-- link edge -> origin -->
+  <path d="M84 96 H248" stroke="#3a4757" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <!-- readers fanning from edge -->
+  <g stroke="#5aa2ff" stroke-width="1.5" stroke-opacity="0.7">
+    <path d="M28 94 L150 40"/><path d="M28 100 L150 70"/><path d="M28 104 L150 140"/><path d="M28 98 L150 105"/>
+  </g>
+  <g fill="#5aa2ff">
+    <circle cx="152" cy="40" r="4"/><circle cx="152" cy="70" r="4"/><circle cx="152" cy="105" r="4"/><circle cx="152" cy="140" r="4"/>
+  </g>
+  <!-- headline bars -->
+  <rect x="176" y="34" width="120" height="8" rx="2" fill="#e5e9f0"/>
+  <rect x="176" y="50" width="86" height="5" rx="2" fill="#5b6b80"/>
+</svg>

@@ -103,6 +103,10 @@ function summary(type: string, c: Record<string, number | string>): string {
       return `${c.partitions} partitions · ${c.consumers} consumers`;
     case "realtime_gateway":
       return `${c.instances}× · ${c.throughputK}k/s push`;
+    case "inference_server": {
+      const hit = Math.min(Number(c.memoryGB) / Math.max(Number(c.workingSetGB), 0.001), 0.95);
+      return `${c.replicas} GPU · ${Math.round(hit * 100)}% cached`;
+    }
     case "aws_sqs":
       return `${c.queues} queues · ${c.consumers} consumers`;
     case "gcp_pubsub":

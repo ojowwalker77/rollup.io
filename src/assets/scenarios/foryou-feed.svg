@@ -1,0 +1,30 @@
+<svg width="320" height="180" viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="180" fill="#141a24"/>
+  <g stroke="#2a3645" stroke-width="1">
+    <path d="M0 45H320M0 90H320M0 135H320M45 0V180M90 0V180M135 0V180M180 0V180M225 0V180M270 0V180"/>
+  </g>
+  <!-- GPU model server -->
+  <rect x="34" y="66" width="64" height="48" rx="6" fill="#1f2937" stroke="#a855f7" stroke-width="2"/>
+  <circle cx="66" cy="84" r="9" stroke="#a855f7" stroke-width="2" fill="none"/>
+  <path d="M66 75 V70 M66 93 V98 M57 84 H52 M75 84 H80 M59 77 L55 73 M73 77 L77 73" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="66" y="109" font-family="monospace" font-size="8" fill="#a855f7" text-anchor="middle">GPU</text>
+  <!-- personalized feed cards -->
+  <g>
+    <rect x="150" y="28" width="138" height="30" rx="5" fill="#1b2330" stroke="#2f3c4d"/>
+    <rect x="150" y="66" width="138" height="30" rx="5" fill="#1b2330" stroke="#2f3c4d"/>
+    <rect x="150" y="104" width="138" height="30" rx="5" fill="#1b2330" stroke="#2f3c4d"/>
+    <circle cx="166" cy="43" r="7" fill="#a855f7" fill-opacity="0.7"/>
+    <circle cx="166" cy="81" r="7" fill="#5aa2ff" fill-opacity="0.7"/>
+    <circle cx="166" cy="119" r="7" fill="#22c55e" fill-opacity="0.7"/>
+    <rect x="180" y="39" width="92" height="4" rx="2" fill="#5b6b80"/>
+    <rect x="180" y="48" width="64" height="4" rx="2" fill="#3a4757"/>
+    <rect x="180" y="77" width="92" height="4" rx="2" fill="#5b6b80"/>
+    <rect x="180" y="86" width="54" height="4" rx="2" fill="#3a4757"/>
+    <rect x="180" y="115" width="92" height="4" rx="2" fill="#5b6b80"/>
+    <rect x="180" y="124" width="72" height="4" rx="2" fill="#3a4757"/>
+  </g>
+  <!-- model -> feed -->
+  <g stroke="#a855f7" stroke-width="1.5" stroke-opacity="0.6">
+    <path d="M98 84 L150 43"/><path d="M98 88 L150 81"/><path d="M98 92 L150 119"/>
+  </g>
+</svg>
