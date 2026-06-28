@@ -3,6 +3,21 @@
 North star: a *systems-design* game, not "drag AWS icons until green." Real primitives,
 real tradeoffs, real tension. Clean & classy, never slopified.
 
+## ▶ v2 — Holistic SWE (APPROVED — full plan in `docs/scenario-spec.md`)
+
+Pivot: train cross-layer judgment (Code · Data · Architecture · Security · Delivery · Operations),
+not just topology. Same symptom, many possible layers — diagnosing the right one is the game.
+Re-ground scenarios in real events (GCP Architect case studies + public post-mortems); Hotel stays
+the synthetic tutorial. Locked: code levers curated/high-signal (not a code editor); stack choice
+(Go/Rust/Node) later; incident-replay style decided after Phase 1.
+
+**Phase 1 — depth everywhere (next):**
+- [ ] Code+data lever model: query pattern (N+1/batch), sync vs async, **DB index** yes/no, payload — engine + curated per-component inspector
+- [ ] Observability component(s) that *gate* the failure diagnosis (no telemetry → blind; instrumented → see the bottleneck) — ties MTTR to observability
+- [ ] Deepen the 5 current scenarios with a code/data root cause (not just "scale the box")
+- [ ] Re-ground Arena = Mountkirk Games, Race Day = Helicopter Racing League
+- Phase 2 Security · Phase 3 Delivery/Ops · Phase 4 Incidents (see spec)
+
 ## Design language (decided — keep continuity)
 
 **Direction: "Blueprint at night / drafting table."** The architect's own artifact is the
