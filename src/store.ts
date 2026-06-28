@@ -136,6 +136,27 @@ function clientNode(level: Level): FlowNode {
   };
 }
 
+/** Materialize a level's board: the client plus its inherited starter (if any).
+ *  Levels without a starter open blank (the from-scratch beats). */
+function buildBoard(level: Level): { nodes: FlowNode[]; edges: Edge[] } {
+  const nodes: FlowNode[] = [clientNode(level)];
+  const edges: Edge[] = [];
+  if (level.starter) {
+    for (const sn of level.starter.nodes) {
+      nodes.push({
+        id: sn.ref,
+        type: "system",
+        position: sn.pos,
+        data: { type: sn.type, config: { ...specOf(sn.type).defaults, ...sn.config } },
+      });
+    }
+    for (const [source, target] of level.starter.edges) {
+      edges.push({ id: `${source}->${target}`, source, target, animated: false });
+    }
+  }
+  return { nodes, edges };
+}
+
 function lerpMetrics(from: Metrics, to: Metrics, k: number): Metrics {
   return {
     offeredRps: lerp(from.offeredRps, to.offeredRps, k),
@@ -152,15 +173,15 @@ function lerpMetrics(from: Metrics, to: Metrics, k: number): Metrics {
 }
 
 const level0 = HOTEL_BOOKING.levels[0]!;
-const seed0 = [clientNode(level0)];
+const board0 = buildBoard(level0);
 
 export const useStore = create<State>()((set, get) => ({
   screen: "home",
   challenge: HOTEL_BOOKING,
   hostingMode: "generic",
   levelIndex: 0,
-  nodes: seed0,
-  edges: [],
+  nodes: board0.nodes,
+  edges: board0.edges,
   selectedId: null,
   selectedEdgeId: null,
   runPhase: "build",
@@ -171,8 +192,8 @@ export const useStore = create<State>()((set, get) => ({
   briefingOpen: true,
   bestCost: loadBest(),
   theme: loadTheme(),
-  result: runSimulation(toSim(seed0), [], 0),
-  evalResult: runSimulation(toSim(seed0), [], 1),
+  result: runSimulation(toSim(board0.nodes), board0.edges, 0),
+  evalResult: runSimulation(toSim(board0.nodes), board0.edges, 1),
   display: ZERO_METRICS,
   seq: 0,
 
@@ -233,15 +254,15 @@ export const useStore = create<State>()((set, get) => ({
   selectChallenge: (id, mode = "generic") => {
     const challenge = CHALLENGES.find((c) => c.id === id) ?? HOTEL_BOOKING;
     const level = challenge.levels[0]!;
-    const seed = [clientNode(level)];
+    const board = buildBoard(level);
     const hostingMode: HostingMode = "generic";
     set({
       screen: "play",
       challenge,
       hostingMode,
       levelIndex: 0,
-      nodes: seed,
-      edges: [],
+      nodes: board.nodes,
+      edges: board.edges,
       selectedId: null,
       selectedEdgeId: null,
       runPhase: "build",
@@ -250,8 +271,8 @@ export const useStore = create<State>()((set, get) => ({
       history: [],
       traffic: 1,
       briefingOpen: true,
-      result: runSimulation(toSim(seed), [], 0),
-      evalResult: runSimulation(toSim(seed), [], 1),
+      result: runSimulation(toSim(board.nodes), board.edges, 0),
+      evalResult: runSimulation(toSim(board.nodes), board.edges, 1),
       display: ZERO_METRICS,
       seq: 0,
     });
@@ -294,9 +315,10 @@ export const useStore = create<State>()((set, get) => ({
   resetLevel: () => {
     const { challenge, levelIndex } = get();
     const level = challenge.levels[levelIndex]!;
+    const board = buildBoard(level);
     set({
-      nodes: [clientNode(level)],
-      edges: [],
+      nodes: board.nodes,
+      edges: board.edges,
       selectedId: null,
       selectedEdgeId: null,
       runPhase: "build",
@@ -304,27 +326,25 @@ export const useStore = create<State>()((set, get) => ({
       history: [],
       reputation: 100,
       display: ZERO_METRICS,
+      seq: 0,
     });
   },
 
-  // Cumulative progression: keep the whole design, just retarget the Client
-  // to the new level's workload and re-enter the build phase.
+  // Each level opens from its own inherited board (a starter architecture
+  // missing the piece that level teaches), or blank for the from-scratch beats.
   nextLevel: () => {
-    const { levelIndex, challenge, nodes } = get();
+    const { levelIndex, challenge } = get();
     const ni = levelIndex + 1;
     const level = challenge.levels[ni];
     if (!level) {
       set({ runPhase: "build" });
       return;
     }
-    const nodes2 = nodes.map((n) =>
-      n.id === "client"
-        ? { ...n, data: { ...n.data, config: { ...n.data.config, rps: level.clientRps, writeRatio: level.clientWriteRatio } } }
-        : n,
-    );
+    const board = buildBoard(level);
     set({
       levelIndex: ni,
-      nodes: nodes2,
+      nodes: board.nodes,
+      edges: board.edges,
       runPhase: "build",
       clock: 0,
       history: [],
@@ -333,6 +353,7 @@ export const useStore = create<State>()((set, get) => ({
       briefingOpen: true,
       selectedId: null,
       selectedEdgeId: null,
+      seq: 0,
     });
   },
 

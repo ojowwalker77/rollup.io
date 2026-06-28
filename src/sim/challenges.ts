@@ -20,10 +20,29 @@ export interface Sla {
   p99Ms: number;
 }
 
+/** A node in a level's pre-built starting architecture. */
+export interface StarterNode {
+  ref: string; // stable local id, also used by edges (e.g. "app", "sql")
+  type: string;
+  /** Config overrides merged onto the component's defaults. */
+  config?: Config;
+  pos: { x: number; y: number };
+}
+
+/** The inherited architecture a level opens with. The implicit "client" source
+ *  always exists; edges may reference it by the id "client". A level with no
+ *  starter opens blank (client only) — reserved for the from-scratch beats. */
+export interface Starter {
+  nodes: StarterNode[];
+  edges: [string, string][]; // [fromRef, toRef]
+}
+
 export interface Level {
   id: string;
   name: string;
   rank: string;
+  /** Inherited board this level opens with. Omit for a blank, from-scratch start. */
+  starter?: Starter;
   /** The chapter lead's briefing, as a short message thread (the voice). */
   thread: string[];
   /** One-line objective for the facts card (what to do, plainly). */
@@ -246,6 +265,14 @@ export const HOTEL_BOOKING: Challenge = {
       id: "l2-growth",
       name: "Travel Blog Spike",
       rank: "Intern Architect",
+      // Inherited from launch: app + database, no cache yet. Reads pile onto SQL.
+      starter: {
+        nodes: [
+          { ref: "app", type: "app_server", config: { replicas: 3, vcpus: 2 }, pos: { x: 360, y: 200 } },
+          { ref: "sql", type: "sql", config: { tier: "small", readReplicas: 0 }, pos: { x: 660, y: 200 } },
+        ],
+        edges: [["client", "app"], ["app", "sql"]],
+      },
       thread: [
         "a travel blogger linked us. traffic more than doubled overnight 😅",
         "the cheap-looking move is a bigger database. the smart move is taking reads off it so you don't need one.",
@@ -268,6 +295,16 @@ export const HOTEL_BOOKING: Challenge = {
       id: "l3-worldcup",
       name: "Conference Weekend",
       rank: "Junior Architect",
+      // Read-optimized design carried over, but the primary is sized for reads,
+      // not the booking write spike. The missing piece is write capacity.
+      starter: {
+        nodes: [
+          { ref: "app", type: "app_server", config: { replicas: 5, vcpus: 2 }, pos: { x: 340, y: 180 } },
+          { ref: "cache", type: "cache", config: { memoryGB: 16, workingSetGB: 24 }, pos: { x: 620, y: 120 } },
+          { ref: "sql", type: "sql", config: { tier: "small", readReplicas: 0 }, pos: { x: 900, y: 220 } },
+        ],
+        edges: [["client", "app"], ["app", "cache"], ["cache", "sql"]],
+      },
       thread: [
         "big travel conference hits town this weekend. everyone books at once — and bookings are writes.",
         "heads up: you can't replica your way out of writes. replicas are for reads. every write lands on the one primary.",
@@ -290,6 +327,16 @@ export const HOTEL_BOOKING: Challenge = {
       id: "l4-championship",
       name: "Promotion Review",
       rank: "Junior Architect",
+      // A working but over-provisioned design. The "missing piece" here is
+      // efficiency: every tier is fatter than it needs to be. Trim to par.
+      starter: {
+        nodes: [
+          { ref: "app", type: "app_server", config: { replicas: 24, vcpus: 4 }, pos: { x: 340, y: 180 } },
+          { ref: "cache", type: "cache", config: { memoryGB: 64, workingSetGB: 40, maxOps: 500000 }, pos: { x: 620, y: 120 } },
+          { ref: "sql", type: "sql", config: { tier: "xlarge", readReplicas: 3 }, pos: { x: 900, y: 220 } },
+        ],
+        edges: [["client", "app"], ["app", "cache"], ["cache", "sql"]],
+      },
       thread: [
         "promotion review. they want to copy your design to every property in the group.",
         "so it has to be rock solid AND cheap. no budget cap this time — the budget is your score. tighter SLA, too.",
@@ -350,6 +397,22 @@ export const ACME_MUSIC: Challenge = {
       id: "sp-l2-search",
       name: "Playlist Saves",
       rank: "Founder Architect",
+      // The playback + metadata product you founded. Missing piece: a write-
+      // scaled store for the flood of user-library saves.
+      starter: {
+        nodes: [
+          { ref: "gw", type: "api_gateway", config: { gateways: 2, maxRpsPerGateway: 14000 }, pos: { x: 340, y: 200 } },
+          { ref: "app", type: "app_server", config: { replicas: 10, vcpus: 4 }, pos: { x: 600, y: 200 } },
+          { ref: "redis", type: "redis", config: { memoryGB: 48, workingSetGB: 64 }, pos: { x: 880, y: 100 } },
+          { ref: "sql", type: "sql", config: { tier: "large", readReplicas: 2 }, pos: { x: 880, y: 240 } },
+          { ref: "cdn", type: "cdn", config: { edgeTb: 20, catalogTb: 24, maxRps: 600000 }, pos: { x: 600, y: 420 } },
+          { ref: "store", type: "object_store", pos: { x: 880, y: 420 } },
+        ],
+        edges: [
+          ["client", "gw"], ["client", "cdn"], ["gw", "app"],
+          ["app", "redis"], ["app", "sql"], ["cdn", "store"],
+        ],
+      },
       thread: [
         "people are saving tracks and following playlists like crazy. that's a lot of new writes.",
         "don't jam all that onto the catalog DB — accounts and catalog like SQL, but high-volume user activity wants a store that scales writes by adding nodes.",
@@ -372,6 +435,23 @@ export const ACME_MUSIC: Challenge = {
       id: "sp-l3-discovery",
       name: "Discovery Goes Viral",
       rank: "Lead Architect",
+      // Playback, metadata, and user library are in place. Missing piece: a
+      // dedicated search read model so discovery doesn't hammer the catalog DB.
+      starter: {
+        nodes: [
+          { ref: "gw", type: "api_gateway", config: { gateways: 3, maxRpsPerGateway: 16000 }, pos: { x: 320, y: 200 } },
+          { ref: "app", type: "app_server", config: { replicas: 16, vcpus: 4 }, pos: { x: 580, y: 200 } },
+          { ref: "redis", type: "redis", config: { memoryGB: 64, workingSetGB: 80 }, pos: { x: 860, y: 80 } },
+          { ref: "sql", type: "sql", config: { tier: "large", readReplicas: 3 }, pos: { x: 860, y: 220 } },
+          { ref: "nosql", type: "nosql", config: { nodes: 8 }, pos: { x: 860, y: 360 } },
+          { ref: "cdn", type: "cdn", config: { edgeTb: 24, catalogTb: 28, maxRps: 900000 }, pos: { x: 580, y: 460 } },
+          { ref: "store", type: "object_store", pos: { x: 860, y: 480 } },
+        ],
+        edges: [
+          ["client", "gw"], ["client", "cdn"], ["gw", "app"],
+          ["app", "redis"], ["app", "sql"], ["app", "nosql"], ["cdn", "store"],
+        ],
+      },
       thread: [
         "the discovery feed blew up overnight. everyone's searching artists, albums, playlists nonstop.",
         "do NOT make the main database be the search engine — that query fanout will flatten it.",
@@ -394,6 +474,24 @@ export const ACME_MUSIC: Challenge = {
       id: "sp-l4-festival",
       name: "Festival Drop",
       rank: "Lead Architect",
+      // The full product: playback, metadata, user library, search. Missing
+      // piece: a queue to buffer the listening-event firehose off the hot path.
+      starter: {
+        nodes: [
+          { ref: "gw", type: "api_gateway", config: { gateways: 4, maxRpsPerGateway: 16000 }, pos: { x: 300, y: 200 } },
+          { ref: "app", type: "app_server", config: { replicas: 24, vcpus: 4 }, pos: { x: 560, y: 200 } },
+          { ref: "redis", type: "redis", config: { memoryGB: 96, workingSetGB: 120 }, pos: { x: 840, y: 60 } },
+          { ref: "sql", type: "sql", config: { tier: "xlarge", readReplicas: 3 }, pos: { x: 840, y: 200 } },
+          { ref: "nosql", type: "nosql", config: { nodes: 12 }, pos: { x: 840, y: 340 } },
+          { ref: "search", type: "search_index", config: { nodes: 8, shardGb: 80 }, pos: { x: 840, y: 480 } },
+          { ref: "cdn", type: "cdn", config: { edgeTb: 32, catalogTb: 36, maxRps: 1500000 }, pos: { x: 560, y: 540 } },
+          { ref: "store", type: "object_store", pos: { x: 840, y: 600 } },
+        ],
+        edges: [
+          ["client", "gw"], ["client", "cdn"], ["gw", "app"],
+          ["app", "redis"], ["app", "sql"], ["app", "nosql"], ["app", "search"], ["cdn", "store"],
+        ],
+      },
       thread: [
         "global festival drop tonight. playback spikes, playlist writes spike, AND a flood of listening events 🚀",
         "the events can't block playback. buffer them — take the write fast, drain it later.",
