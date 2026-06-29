@@ -152,15 +152,18 @@ export function SystemNode({ id, data, selected }: NodeProps) {
   const ev = useStore((s) => s.evalResult.nodes[id]);
   const runPhase = useStore((s) => s.runPhase);
   const isSource = spec.category === "source";
-  const isMonitor = spec.category === "observability";
   const hasRun = runPhase !== "build";
+  // Internals (health, utilization, latency, redline) are only visible if the
+  // run is instrumented — that's what provisioning Observability buys you.
+  const instrumented = useStore((s) => s.observability) !== "none";
+  const showInternals = hasRun && instrumented;
 
-  const health = hasRun ? r?.health ?? "idle" : "idle";
+  const health = showInternals ? r?.health ?? "idle" : "idle";
   const hc = HEALTH[health];
   const util = r?.utilization ?? 0;
-  const loaded = hasRun && (r?.input.rps ?? 0) > 0.01;
+  const loaded = showInternals && (r?.input.rps ?? 0) > 0.01;
   const barPct = Math.min(util, 1) * 100;
-  const showGlow = hasRun && health !== "idle";
+  const showGlow = showInternals && health !== "idle";
 
   // Build-time capacity plan (static peak estimate — not a live result).
   const cap = ev?.capacity ?? 0;
@@ -201,12 +204,10 @@ export function SystemNode({ id, data, selected }: NodeProps) {
         {summary(d.type, d.config)}
       </div>
 
-      {isSource || isMonitor ? (
-        <div className="mt-2 h-[18px] text-[11px] leading-[18px] text-muted-foreground">
-          {isMonitor ? "monitoring" : "traffic source"}
-        </div>
+      {isSource ? (
+        <div className="mt-2 h-[18px] text-[11px] leading-[18px] text-muted-foreground">traffic source</div>
       ) : loaded ? (
-        // Live: measured load, latency, and a health-colored utilization bar.
+        // Live + instrumented: measured load, latency, and a health-colored bar.
         <div className="mt-2">
           <div className="flex items-baseline justify-between font-mono text-[11px]">
             <span style={{ color: hc.text }}>{Math.round(util * 100)}%</span>
@@ -216,8 +217,13 @@ export function SystemNode({ id, data, selected }: NodeProps) {
             <div className="h-full rounded-full transition-all" style={{ width: `${barPct}%`, background: hc.border }} />
           </div>
         </div>
-      ) : hasRun ? (
+      ) : showInternals ? (
         <div className="mt-2 h-[18px] text-[11px] leading-[18px] text-muted-foreground">no load</div>
+      ) : hasRun ? (
+        // Live but no observability — it's running, but you can't see inside.
+        <div className="mt-2 flex h-[18px] items-center gap-1.5 text-[11px] leading-[18px] text-muted-foreground">
+          <span className="size-1.5 rounded-full bg-muted-foreground/50" /> live · no telemetry
+        </div>
       ) : (
         // Build: a calm capacity plan in azure — design estimate, not a live run.
         <div className="mt-2">

@@ -12,7 +12,7 @@ export const PROFILE: Scenario = {
     "The page got slow as the data grew — same servers, same traffic, but it crawls. The fix isn't a bigger box; it's the query. Learn to read the symptom and fix it at the code/data layer.",
   teaches: ["Database indexes", "N+1 queries", "Fix the query not the box", "Observability"],
   art: "/assets/scenarios/profile-page.svg",
-  components: ["app_server", "sql", "cache", "observability"],
+  components: ["app_server", "sql", "cache"],
   levels: [
     {
       id: "pp-l1-index",

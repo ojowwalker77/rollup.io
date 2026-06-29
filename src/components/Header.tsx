@@ -1,7 +1,7 @@
 import { ArrowRight, BookOpen, Grid2X2, Moon, Network, RotateCcw, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useStore } from "../store";
+import { OBS_COST, useStore } from "../store";
 
 function usd(n: number): string {
   return n === Infinity ? "∞" : `$${Math.round(n).toLocaleString()}`;
@@ -10,7 +10,7 @@ function usd(n: number): string {
 export function Header() {
   const scenario = useStore((s) => s.scenario);
   const levelIndex = useStore((s) => s.levelIndex);
-  const cost = useStore((s) => s.result.metrics.totalCostUsd);
+  const cost = useStore((s) => s.result.metrics.totalCostUsd + OBS_COST[s.observability]);
   const runPhase = useStore((s) => s.runPhase);
   const bestCost = useStore((s) => s.bestCost);
   const setBriefing = useStore((s) => s.setBriefing);

@@ -8,9 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { specOf } from "../sim/components";
-import { diagnoseLoss, type ObsLevel } from "../sim/diagnose";
-import { useStore } from "../store";
+import { diagnoseLoss } from "../sim/diagnose";
+import { OBS_COST, useStore } from "../store";
 
 const usd = (n: number) => (n === Infinity ? "∞" : `$${Math.round(n).toLocaleString()}`);
 
@@ -21,25 +20,11 @@ export function GameOver() {
   const result = useStore((s) => s.result);
   const scenario = useStore((s) => s.scenario);
   const levelIndex = useStore((s) => s.levelIndex);
-  const nodes = useStore((s) => s.nodes);
-  const edges = useStore((s) => s.edges);
+  const obs = useStore((s) => s.observability);
   const level = scenario.levels[levelIndex]!;
 
-  // How much you can SEE depends on the observability you wired (and connected).
-  // The tutorial always shows the full cause — it's teaching the basics, not MTTR.
-  const monitor = nodes.find((n) => specOf(n.data.type).category === "observability");
-  const connected = monitor && edges.some((e) => e.source === monitor.id || e.target === monitor.id);
-  const obs: ObsLevel =
-    scenario.id === "hotel-booking"
-      ? "full"
-      : monitor && connected
-        ? String(monitor.data.config.coverage) === "basic"
-          ? "basic"
-          : "full"
-        : "none";
-
   const lostCustomers = reputation <= 0;
-  const cost = result.metrics.totalCostUsd;
+  const cost = result.metrics.totalCostUsd + OBS_COST[obs];
   const diag = diagnoseLoss(level, result, lostCustomers, obs);
 
   return (

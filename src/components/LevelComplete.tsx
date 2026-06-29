@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import type { Level } from "../sim/scenarios";
-import { useStore } from "../store";
+import { OBS_COST, useStore } from "../store";
 
 const usd = (n: number) => (n === Infinity ? "∞" : `$${Math.round(n).toLocaleString()}`);
 
@@ -30,7 +30,7 @@ export function LevelComplete() {
   const nextLevel = useStore((s) => s.nextLevel);
   const scenario = useStore((s) => s.scenario);
   const levelIndex = useStore((s) => s.levelIndex);
-  const cost = useStore((s) => s.result.metrics.totalCostUsd);
+  const cost = useStore((s) => s.result.metrics.totalCostUsd + OBS_COST[s.observability]);
   const best = useStore((s) => s.bestCost);
   const level = scenario.levels[levelIndex]!;
 

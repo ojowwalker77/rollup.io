@@ -12,7 +12,12 @@ import { create } from "zustand";
 import { specOf } from "./sim/components";
 import { runSimulation, type SimEdge, type SimNode } from "./sim/engine";
 import { DEFAULT_SCENARIO, SCENARIOS, profileAt, type Level, type Scenario } from "./sim/scenarios";
+import type { ObsLevel } from "./sim/diagnose";
 import type { Config, Metrics, SimResult } from "./sim/types";
+
+/** Observability is provisioned (bought) on the dashboard, not placed on the
+ *  canvas — it's how you SEE the run, and it adds to the monthly bill. */
+export const OBS_COST: Record<ObsLevel, number> = { none: 0, basic: 120, full: 300 };
 
 export interface SystemNodeData extends Record<string, unknown> {
   type: string;
@@ -86,6 +91,7 @@ interface State {
   history: TimePoint[];
   traffic: number; // build-time preview multiplier
   briefingOpen: boolean;
+  observability: ObsLevel; // provisioned monitoring — gates runtime telemetry
   bestCost: Record<string, number>;
   theme: Theme;
   result: SimResult; // live/preview
@@ -103,6 +109,7 @@ interface State {
   select: (id: string | null) => void;
   selectEdge: (id: string | null) => void;
   selectScenario: (id: string) => void;
+  setObservability: (o: ObsLevel) => void;
   goHome: () => void;
   setTraffic: (t: number) => void;
   setBriefing: (open: boolean) => void;
@@ -187,6 +194,7 @@ export const useStore = create<State>()((set, get) => ({
   history: [],
   traffic: 1,
   briefingOpen: true,
+  observability: "none",
   bestCost: loadBest(),
   theme: loadTheme(),
   result: runSimulation(toSim(board0.nodes), board0.edges, 0, level0.mix),
@@ -247,6 +255,10 @@ export const useStore = create<State>()((set, get) => ({
   selectEdge: (id) => set({ selectedEdgeId: id, selectedId: null }),
   setTraffic: (t) => set({ traffic: t }),
   setBriefing: (open) => set({ briefingOpen: open }),
+  setObservability: (o) => {
+    if (get().runPhase !== "build") return; // provisioned before going live
+    set({ observability: o });
+  },
 
   selectScenario: (id) => {
     const scenario = SCENARIOS.find((s) => s.id === id) ?? DEFAULT_SCENARIO;
@@ -266,6 +278,7 @@ export const useStore = create<State>()((set, get) => ({
       history: [],
       traffic: 1,
       briefingOpen: true,
+      observability: "none",
       result: runSimulation(toSim(board.nodes), board.edges, 0, level.mix),
       evalResult: runSimulation(toSim(board.nodes), board.edges, 1, level.mix),
       display: ZERO_METRICS,
@@ -316,6 +329,7 @@ export const useStore = create<State>()((set, get) => ({
       history: [],
       reputation: 100,
       display: ZERO_METRICS,
+      observability: "none",
       seq: 0,
     });
   },
@@ -341,6 +355,7 @@ export const useStore = create<State>()((set, get) => ({
       reputation: 100,
       display: ZERO_METRICS,
       briefingOpen: true,
+      observability: "none",
       selectedId: null,
       selectedEdgeId: null,
       seq: 0,
@@ -367,7 +382,7 @@ export const useStore = create<State>()((set, get) => ({
 
       const history = s.history.concat({ t, offered: m.offeredRps, served: m.servedRps, rep: reputation });
       const clock = t + 1 / PLAY_TICKS;
-      const cost = m.totalCostUsd;
+      const cost = m.totalCostUsd + OBS_COST[s.observability]; // monitoring is on the bill
 
       let nextPhase: RunPhase = "live";
       let bestCost = s.bestCost;

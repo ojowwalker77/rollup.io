@@ -13,7 +13,12 @@ the synthetic tutorial. Locked: code levers curated/high-signal (not a code edit
 
 **Phase 1 — depth everywhere:**
 - [x] Code+data lever model: **DB index** (full-scan penalty), **N+1** queries/request, **async vs blocking** I/O — in component evaluate(); node faces show flags. Verified.
-- [x] **Observability** component gates the failure diagnosis (none → blind; basic → hot boxes; full → root cause). Tutorial exempt.
+- [x] **Observability** now a provisioned toggle (Off / Metrics / Full) that gates ALL runtime
+      telemetry, not just the post-mortem — fixes the bug where you could read the cause anyway.
+      none → nodes neutral + "flying blind"; basic → metrics + node health; full → + bottleneck/traces.
+- [x] **UI/UX rework → Layout A.** Replaced the 4 floating panels with one bottom **Dock**:
+      build = Targets + Monitoring control + Go Live; run = LIVE/progress + gated Telemetry +
+      always-on Customers meter. Canvas is the hero; SystemNode/ConfigPanel telemetry now gated.
 - [x] New **Profile Page** scenario (easy) showcasing it: a missing index / N+1 that scaling can't fix (verified: xlarge + 40 replicas still fail and bust budget; the index/batch is the fix).
 - [ ] Deepen the OTHER existing scenarios with a code/data root cause where it fits
 - [ ] Re-ground Arena = Mountkirk Games, Race Day = Helicopter Racing League (needs mechanic fit, not just copy)

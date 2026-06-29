@@ -8,7 +8,7 @@ export const ACME_MUSIC: Scenario = {
     "A media product at scale: edge-deliver audio, separate user-library writes onto a partitioned store, give search its own read model, and buffer a firehose of listening events.",
   teaches: ["CDN / media", "NoSQL", "Search", "Event queues"],
   art: "/assets/scenarios/acme-music.svg",
-  components: ["api_gateway", "app_server", "redis", "sql", "nosql", "cdn", "object_store", "search_index", "event_queue", "observability"],
+  components: ["api_gateway", "app_server", "redis", "sql", "nosql", "cdn", "object_store", "search_index", "event_queue"],
   levels: [
     {
       id: "sp-l1-playback",

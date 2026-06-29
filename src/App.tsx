@@ -2,17 +2,14 @@ import { ReactFlowProvider } from "@xyflow/react";
 import { useEffect } from "react";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Briefing } from "./components/Briefing";
-import { ChallengePanel } from "./components/ChallengePanel";
 import { ConfigPanel } from "./components/ConfigPanel";
+import { Dock } from "./components/Dock";
 import { FlowCanvas } from "./components/FlowCanvas";
 import { GameOver } from "./components/GameOver";
 import { Header } from "./components/Header";
 import { LevelComplete } from "./components/LevelComplete";
-import { MetricsPanel } from "./components/MetricsPanel";
 import { Palette } from "./components/Palette";
 import { ScenarioSelect } from "./components/ScenarioSelect";
-import { Timeline } from "./components/Timeline";
-import { TopControls } from "./components/TopControls";
 import { useStore } from "./store";
 
 export function App() {
@@ -43,13 +40,10 @@ export function App() {
                 <Palette />
                 <main className="relative min-w-0 flex-1">
                   <FlowCanvas />
-                  <TopControls />
-                  <MetricsPanel />
-                  <ChallengePanel />
-                  <Timeline />
                 </main>
                 <ConfigPanel />
               </div>
+              <Dock />
             </div>
             <Briefing />
             <LevelComplete />
